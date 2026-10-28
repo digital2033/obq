@@ -179,3 +179,15 @@ Object.assign(QUIZ_I18N.en, {
   readAloud: "Read aloud", stopReading: "Stop reading",
   noVoice: "No voice for {lang} was found on this device, so the question may not be read correctly. Install a voice in the device's text-to-speech settings, or read the questions yourself."
 });
+
+/* sign-in with an email link (no password) and password reset */
+Object.assign(QUIZ_I18N.en, {
+  linkBtn: "Email me a sign-in link (no password needed)",
+  linkSent: "We sent a sign-in link to {email}. Open the email on this device and click the link to sign in. Look in the spam folder too.",
+  linkAskTitle: "Finish signing in", linkAsk: "Type the email address the sign-in link was sent to.", linkDone: "Finish signing in",
+  errLinkOff: "Sign-in with an email link is not turned on in Firebase (Authentication, Sign-in method, Email/Password, then Email link).",
+  errLinkDomain: "This website's address is not in the Authorized domains list of your Firebase project.",
+  errLinkBad: "This sign-in link is not valid any more (it can be used once and expires). Please ask for a new link.",
+  pfTitle: "Complete your profile", pfIntro: "You are signed in. Tell us a little about you to finish creating your Quiz Master account.", pfSave: "Continue",
+  forgotHint: "Type your email address in the box above, then press Forgot password."
+});

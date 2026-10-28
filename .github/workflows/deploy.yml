@@ -1,7 +1,8 @@
 # Builds the app and publishes it with GitHub Pages on every push to main.
 # One-time setup: Settings > Pages > Source = "GitHub Actions".
-# Optional: add a repository secret FIREBASE_CONFIG_JSON (Settings > Secrets and variables > Actions) holding your Firebase web
-# config as JSON, to turn on sign-in with Firebase on the published site. Without it the site runs in local mode with the sample bank.
+# Optional secrets: OBQ_BANK_KEY (the key that decrypts the full question bank, src/cfg3_bank.enc.json; without it the small sample bank is used)
+# and FIREBASE_CONFIG_JSON (Settings > Secrets and variables > Actions) holding your Firebase web
+# config as JSON, to turn on sign-in with Firebase on the published site. Without it the site runs in local mode.
 name: Build and deploy
 on:
   push: { branches: [main] }
@@ -20,7 +21,10 @@ jobs:
         env: { FB: "${{ secrets.FIREBASE_CONFIG_JSON }}" }
         run: |
           if [ -n "$FB" ]; then mkdir -p private && printf '%s' "$FB" > private/firebase.config.json; echo "Firebase config applied"; else echo "No Firebase secret: local mode"; fi
-      - run: python tools/make_template.py && python tools/assemble.py && python tools/build_pwa.py
+      - run: pip install cryptography
+      - name: Build
+        env: { OBQ_BANK_KEY: "${{ secrets.OBQ_BANK_KEY }}" }
+        run: python tools/make_template.py && python tools/assemble.py && python tools/build_pwa.py
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist/obq-app }
   deploy:

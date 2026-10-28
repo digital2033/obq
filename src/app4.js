@@ -184,6 +184,16 @@
     var u = key ? localUsers()[key] : null;
     if (u) onLogin(u.profile, false);
   }
+  /* The built-in bank may be shipped encrypted (BANK_ENC): AES-GCM, key = SHA-256 of BANK_PASS, deflate-compressed JSON. Decrypted once at start-up. */
+  function ensureBank() {
+    if (typeof BANK_ENC === "undefined" || STARTER_BANK.length) return Promise.resolve();
+    function bytes(b64) { var s = atob(b64), u = new Uint8Array(s.length), i; for (i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+    return window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(BANK_PASS))
+      .then(function (k) { return window.crypto.subtle.importKey("raw", k, "AES-GCM", false, ["decrypt"]); })
+      .then(function (key) { return window.crypto.subtle.decrypt({ name: "AES-GCM", iv: bytes(BANK_ENC.iv) }, key, bytes(BANK_ENC.ct)); })
+      .then(function (buf) { return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text(); })
+      .then(function (txt) { JSON.parse(txt).forEach(function (r) { STARTER_BANK.push(r); }); STARTER = null; });
+  }
   function boot() {
     applyColors(); paintBrand();
     var saved = lsGet("qms.ui", S.defaultUiLang);
@@ -199,11 +209,15 @@
     $("fs").addEventListener("click", toggleFs); $("exitFs").addEventListener("click", exitFs); $("exitFs2").addEventListener("click", exitFs);
     setUi(saved);
     show("auth");
+    ensureBank().catch(function () {}).then(function () { start(); });
+  }
+  function start() {
     if (!S.requireLogin) {
       user = { email: "", name: "", org: "", country: "", usage: "", consent: true }; loadBank(); goHomePage(); return;
     }
     initFirebase().then(function (on) {
       paintSelects();
+      if (on && fb.auth.isSignInWithEmailLink(window.location.href)) { finishLink(); return; }          // the page was opened from a sign-in link in an email
       if (on) {
         var first = true;
         fb.auth.onAuthStateChanged(function (u) {

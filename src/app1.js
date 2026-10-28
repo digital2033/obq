@@ -196,7 +196,52 @@
     $("authTabs").hidden = true; $("formIn").hidden = true; $("formUp").hidden = true; $("verifyBox").hidden = false;
     $("verifyMsg").textContent = T("verifyMsg", { email: email || "" }); $("verifyStatus").textContent = ""; $("authErr").textContent = ""; authBusy(false); show("auth");
   }
-  function hideVerify() { $("verifyBox").hidden = true; $("authTabs").hidden = false; }
+  function hideVerify() { ["verifyBox", "linkBox", "profileBox"].forEach(function (id) { $(id).hidden = true; }); $("authTabs").hidden = false; }
+  function showAuthBox(id) { $("authTabs").hidden = true; $("formIn").hidden = true; $("formUp").hidden = true; ["verifyBox", "linkBox", "profileBox"].forEach(function (x) { $(x).hidden = x !== id; }); $("authErr").textContent = ""; authBusy(false); show("auth"); }
+
+  /* ---------- sign in with an email link (Firebase "Email link" provider): no password ---------- */
+  function linkErr(e) {
+    var c = (e && e.code) || "";
+    if (c === "auth/operation-not-allowed") return "errLinkOff";
+    if (c === "auth/unauthorized-continue-uri" || c === "auth/invalid-continue-uri" || c === "auth/missing-continue-uri") return "errLinkDomain";
+    if (c === "auth/invalid-action-code" || c === "auth/expired-action-code") return "errLinkBad";
+    return fbErr(e);
+  }
+  function sendLink() {
+    var email = normName($("inEmail").value), err = $("authErr"), note = $("authNote");
+    if (!fb.on) { err.textContent = T("localNote"); return; }
+    if (!email) { err.textContent = T("errFill"); return; }
+    if (!validEmail(email)) { err.textContent = T("errEmail"); return; }
+    err.textContent = ""; authBusy(true);
+    fb.auth.sendSignInLinkToEmail(email, { url: window.location.origin + window.location.pathname, handleCodeInApp: true }).then(function () {
+      lsSet("qms.emailForSignIn", email); authBusy(false); note.className = "okmsg"; note.textContent = T("linkSent", { email: email });
+    }, function (e) { authBusy(false); err.textContent = T(linkErr(e)); });
+  }
+  function finishLink(emailGiven) {
+    var email = emailGiven || lsGet("qms.emailForSignIn", "");
+    if (!email) { showAuthBox("linkBox"); return; }                         // opened on another device: ask for the address
+    fb.auth.signInWithEmailLink(email, window.location.href).then(function (cred) {
+      lsDel("qms.emailForSignIn");
+      try { window.history.replaceState(null, "", window.location.pathname); } catch (x) {}   // remove the one-time code from the address bar
+      afterLinkSignIn(cred.user);
+    }, function (e) { showAuthBox("linkBox"); $("authErr").textContent = T(linkErr(e)); });
+  }
+  function afterLinkSignIn(u) {
+    var openProfileForm = function () { $("pfName").value = u.displayName || (u.email || "").split("@")[0]; showAuthBox("profileBox"); };
+    fb.db.collection("quizMasters").doc(u.uid).get().then(function (d) {
+      if (d && d.exists) fbProfile(u).then(function (p) { hideVerify(); onLogin(p, false); }); else openProfileForm();
+    }).catch(openProfileForm);
+  }
+  function saveProfileForm() {
+    var u = fb.auth.currentUser, p = { name: normName($("pfName").value), org: normName($("pfOrg").value), country: normName($("pfCountry").value), usage: $("pfUsage").value, consent: $("pfConsent").checked };
+    if (!u) { $("authErr").textContent = T("verifyFail"); return; }
+    if (!p.name || !p.org || !p.country || !p.usage) { $("authErr").textContent = T("errFill"); return; }
+    $("authErr").textContent = "";
+    var F = window.firebase.firestore.FieldValue;
+    fb.db.collection("quizMasters").doc(u.uid).set({ name: p.name, email: u.email, org: p.org, country: p.country, usage: p.usage, consent: p.consent, createdAt: F.serverTimestamp(), loginCount: 0 })
+      .then(function () { try { u.updateProfile({ displayName: p.name }); } catch (x) {} return fbProfile(u); })
+      .then(function (prof) { hideVerify(); onLogin(prof, true); }, function () { $("authErr").textContent = T("errNet"); });
+  }
   function verifyCheck() {
     var u = fb.on && fb.auth && fb.auth.currentUser, st = $("verifyStatus");
     if (!u) { st.className = "err"; st.textContent = T("verifyFail"); return; }
@@ -259,7 +304,7 @@
     $("tabIn").setAttribute("aria-selected", up ? "false" : "true"); $("tabUp").setAttribute("aria-selected", up ? "true" : "false");
     $("authErr").textContent = "";
   }
-  function authBusy(b) { ["btnIn", "btnUp"].forEach(function (id) { $(id).disabled = b; }); }
+  function authBusy(b) { ["btnIn", "btnUp", "btnLink"].forEach(function (id) { $(id).disabled = b; }); }
   function authFail(e) { authBusy(false); $("authErr").textContent = T((e && e.key) || "errNet"); }
   function wireAuth() {
     $("tabIn").addEventListener("click", function () { setAuthTab("in"); });
@@ -291,10 +336,14 @@
     $("skipLogin").addEventListener("click", function () { lsSet("qms.session", "skip"); onLogin(skipProfile(), false); });
     $("forgotBtn").addEventListener("click", function () {
       var email = normName($("inEmail").value);
+      if (!email) { $("authErr").textContent = T("forgotHint"); return; }
       if (!validEmail(email)) { $("authErr").textContent = T("errEmail"); return; }
       if (!fb.on) { $("authErr").textContent = T("localNote"); return; }
-      fb.auth.sendPasswordResetEmail(email).then(function () { $("authErr").textContent = ""; $("authNote").textContent = T("resetSent"); }, function (e) { $("authErr").textContent = T(fbErr(e)); });
+      fb.auth.sendPasswordResetEmail(email).then(function () { $("authErr").textContent = ""; $("authNote").className = "okmsg"; $("authNote").textContent = T("resetSent"); }, function (e) { $("authErr").textContent = T(fbErr(e)); });
     });
+    $("btnLink").addEventListener("click", sendLink);
+    $("linkDone").addEventListener("click", function () { var em = normName($("linkEmail").value); if (!validEmail(em)) { $("authErr").textContent = T("errEmail"); return; } finishLink(em); });
+    $("pfSave").addEventListener("click", saveProfileForm);
     $("signOutBtn").addEventListener("click", signOut);
     $("verifyDone").addEventListener("click", verifyCheck); $("verifyResend").addEventListener("click", verifyResend); $("verifyOut").addEventListener("click", signOut);
   }

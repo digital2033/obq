@@ -30,6 +30,7 @@
         <div class="field"><label for="inEmail" data-i18n="email"></label><input type="email" id="inEmail" autocomplete="email"></div>
         <div class="field"><label for="inPass" data-i18n="pass"></label><input type="password" id="inPass" autocomplete="current-password"></div>
         <button class="primary" type="button" id="btnIn" data-i18n="btnIn"></button>
+        <button class="ghost" type="button" id="btnLink" hidden data-i18n="linkBtn"></button>
         <button class="link" type="button" id="forgotBtn" data-i18n="forgot"></button>
       </div>
       <div class="authform" id="formUp" hidden>
@@ -50,6 +51,22 @@
         <button class="ghost" id="verifyResend" type="button" data-i18n="verifyResend"></button>
         <button class="link" id="verifyOut" type="button" data-i18n="verifyOut"></button>
         <div class="note" id="verifyStatus" aria-live="polite"></div>
+      </div>
+      <div class="authform" id="linkBox" hidden>
+        <h2 class="gh" data-i18n="linkAskTitle"></h2>
+        <p class="note" data-i18n="linkAsk"></p>
+        <div class="field"><label for="linkEmail" data-i18n="email"></label><input type="email" id="linkEmail" autocomplete="email"></div>
+        <button class="primary" id="linkDone" type="button" data-i18n="linkDone"></button>
+      </div>
+      <div class="authform" id="profileBox" hidden>
+        <h2 class="gh" data-i18n="pfTitle"></h2>
+        <p class="note" data-i18n="pfIntro"></p>
+        <div class="field"><label for="pfName" data-i18n="fullName"></label><input type="text" id="pfName" autocomplete="name" maxlength="80"></div>
+        <div class="field"><label for="pfOrg" data-i18n="org"></label><input type="text" id="pfOrg" autocomplete="organization" maxlength="100"></div>
+        <div class="field"><label for="pfCountry" data-i18n="country"></label><input type="text" id="pfCountry" autocomplete="country-name" maxlength="60"></div>
+        <div class="field"><label for="pfUsage" data-i18n="usage"></label><select id="pfUsage"></select></div>
+        <label class="check"><input type="checkbox" id="pfConsent" checked><span data-i18n="consent"></span></label>
+        <button class="primary" id="pfSave" type="button" data-i18n="pfSave"></button>
       </div>
       <div class="err" id="authErr" role="alert"></div>
       <div class="note" id="authNote" aria-live="polite"></div>

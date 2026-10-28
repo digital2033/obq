@@ -357,7 +357,9 @@
     });
     $("keysHelp").textContent = T("keysHelp");
     $("authNote").textContent = fb.on ? "" : T("localNote");
-    $("forgotBtn").hidden = !fb.on;
+    $("forgotBtn").hidden = !fb.on; $("btnLink").hidden = !fb.on;
+    var pu = $("pfUsage"), pv = pu.value; clear(pu); var po = el("option", null, T("usage")); po.value = ""; pu.appendChild(po);
+    [["church", "use1"], ["school", "use2"], ["community", "use3"], ["work", "use4"]].forEach(function (x) { var o = el("option", null, T(x[1])); o.value = x[0]; pu.appendChild(o); }); pu.value = pv;
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-mode]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-mode") === sel.mode ? "true" : "false"); });
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-style]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-style") === sel.style ? "true" : "false"); });
     refreshBooks(true);

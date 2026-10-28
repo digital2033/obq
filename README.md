@@ -15,7 +15,7 @@
 - Question kinds: regular, multiple choice, multiple choice with **50:50**, short answer with hints, **Who am I?** (points fall with each clue), multi-part (more points), trivia and difficult.
 
 **Your questions**
-- A built-in English question bank (a small sample comes with this repository).
+- A built-in English question bank of about 1,390 questions covering all 66 books, in every kind of question (stored encrypted in the repository).
 - Your own questions from an **Excel template** (download it inside the app, fill it in, upload it).
 - Questions made automatically from **Bible text** you add (USFM, USFX, USX, plain text or a zip; or download from Bible Brain with your own key), in any language, including languages that are not on the language list.
 
@@ -27,7 +27,7 @@
 
 ## Basic usage
 
-1. **Sign in** (or create an account). With Firebase connected you confirm your email address first; without it the app runs in local mode on your device.
+1. **Sign in** (or create an account). With Firebase connected you can sign in with a password, reset a forgotten password by email, or use an **email sign-in link** that needs no password; new accounts confirm their email address. Without Firebase the app runs in local mode on your device.
 2. On the **Home page** choose:
    - **OBQ Lite - Quick Quiz** for the fastest start, or
    - **Set up a quiz** for full control, or
@@ -67,17 +67,23 @@ python tools/build_pwa.py         # dist/obq-app/ and dist/obq-app.zip: the inst
 python -m http.server 8000 --directory dist/obq-app      # then open http://localhost:8000
 ```
 
-The repository includes a **sample question bank** (`data/sample-question-bank.xlsx`, 198 questions). To use your own full bank and your own Firebase project without putting them in the repository, create a folder `private/` (it is ignored by git):
+**Question bank.** `src/cfg3_bank.js` is a small plain-text sample (198 questions, from `data/sample-question-bank.xlsx`). The full bank of about 1,390 questions is stored **encrypted** in `src/cfg3_bank.enc.json`, so it cannot be read from the repository. When the build has the key it decrypts nothing itself: it embeds the encrypted bank in the page together with the key, and the page decrypts it when it starts. Give the build the key with the environment variable `OBQ_BANK_KEY` or the file `private/bank.key`; without a key the sample bank is used. To encrypt your own bank:
 
 ```
-private/OBQ-your-bank.xlsx           your full bank
-private/firebase.config.json         your Firebase web config (optional)
-python tools/import_bank.py private/OBQ-your-bank.xlsx --out private/cfg3_bank.js
+python tools/import_bank.py YOUR-BANK.xlsx --encrypt --key-file private/bank.key
 ```
 
-The next build then uses them automatically. Without Firebase the app works in local mode: accounts and results stay on the device.
+This keeps the questions out of the repository and out of casual view-source, but it is not unbreakable: a page that can show the questions must be able to decrypt them.
 
-Publishing: any static host works (upload `dist/obq-app/`). The included GitHub Action (`.github/workflows/deploy.yml`) publishes the sample build with GitHub Pages.
+To turn on sign-in and cloud features with your own Firebase project **without putting its settings in the repository**, create a folder `private/` (it is ignored by git) and put your Firebase web config in it as `private/firebase.config.json`:
+
+```
+{ "apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "...", "measurementId": "..." }
+```
+
+The next build uses it automatically. Without it the app works in local mode: accounts and results stay on the device.
+
+Publishing: any static host works (upload `dist/obq-app/`). The included GitHub Action (`.github/workflows/deploy.yml`) builds and publishes the site with GitHub Pages; to include your Firebase config, add it as a repository secret named `FIREBASE_CONFIG_JSON`.
 
 ## Your data
 
@@ -87,4 +93,4 @@ Publishing: any static host works (upload `dist/obq-app/`). The included GitHub 
 
 ## Folders
 
-`src/` source files (settings, interface text, engine) | `tools/` build scripts | `data/` sample question bank | `assets/` logo | `templates/` Excel template | `tests/` checks
+`src/` source files (settings, interface text, engine) | `tools/` build scripts | `data/` question bank | `assets/` logo | `templates/` Excel template | `tests/` checks

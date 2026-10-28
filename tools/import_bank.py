@@ -1,7 +1,9 @@
 """Converts a question bank workbook into the built-in bank file.
    Run:  python3 tools/import_bank.py [path-to-xlsx] [--out path]
-   Default: data/sample-question-bank.xlsx  ->  src/cfg3_bank.js (the small sample bank that ships with the repository).
-   For your full bank:  python3 tools/import_bank.py private/YOUR-BANK.xlsx --out private/cfg3_bank.js
+   Default: data/sample-question-bank.xlsx  ->  src/cfg3_bank.js (the small plain-text sample bank that ships with the repository).
+   Full bank, ENCRYPTED:  python3 tools/import_bank.py private/YOUR-BANK.xlsx --encrypt --key-file private/bank.key
+        -> src/cfg3_bank.enc.json (safe to publish: it cannot be read without the key; the build needs the key, see README)
+   Another bank for local tests only:  python3 tools/import_bank.py YOUR-BANK.xlsx --out private/cfg3_bank.js   (the build prefers private/cfg3_bank.js)
    Same rules as the in-app Excel import; rows with a problem are skipped and listed."""
 import collections, json, os, re, sys
 from openpyxl import load_workbook
@@ -95,6 +97,19 @@ for ri, r in enumerate(rows[1:], start=2):
     while len(row) > 3 and row[-1] in (None, "", []): row.pop()
     # pad Pts/Secs positions when only Secs is present
     out.append(row)
+
+if "--encrypt" in sys.argv:
+    import base64, hashlib, zlib
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    key = os.environ.get("OBQ_BANK_KEY", "")
+    if "--key-file" in sys.argv: key = open(sys.argv[sys.argv.index("--key-file") + 1], encoding="utf-8").read().strip()
+    if not key: sys.exit("No key: use --key-file private/bank.key or set OBQ_BANK_KEY")
+    comp = zlib.compressobj(9, zlib.DEFLATED, -15); raw = json.dumps(out, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    data = comp.compress(raw) + comp.flush(); iv = os.urandom(12)
+    ct = AESGCM(hashlib.sha256(key.encode("utf-8")).digest()).encrypt(iv, data, None)
+    target = OUT if "--out" in sys.argv else os.path.join(ROOT, "src", "cfg3_bank.enc.json")
+    open(target, "w", encoding="utf-8").write(json.dumps({"v": 1, "rows": len(out), "iv": base64.b64encode(iv).decode(), "ct": base64.b64encode(ct).decode()}))
+    print("encrypted", len(out), "questions ->", target, "(%d KB)" % (os.path.getsize(target) // 1024)); sys.exit(0)
 
 def fix(row):
     # make positions stable: 0 book,1 cat,2 q,3 a,4 ref,5 opts,6 clues,7 info,8 level,9 parts,10 pts,11 secs

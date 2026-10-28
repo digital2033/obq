@@ -18,12 +18,25 @@ css = rd("css_base.css")
 css += "\n" + rd("css_new.css")
 
 # 2. configuration blocks (settings, interface text, questions) - they go at the very top
-# Private files (never committed, see .gitignore): private/cfg3_bank.js = your full question bank, private/firebase.config.json = your Firebase web config.
-# Without them the build uses the small sample bank in src/ and runs without Firebase (local mode).
+# Optional private files (never committed, see .gitignore): private/firebase.config.json = your Firebase web config,
+# private/bank.key (or env OBQ_BANK_KEY) = the key for src/cfg3_bank.enc.json, private/cfg3_bank.js = a different bank for local tests. Without a Firebase file the app runs in local mode.
 PRIV = os.path.join(ROOT, "private")
 bank_file = os.path.join(PRIV, "cfg3_bank.js")
-bank_src = open(bank_file, encoding="utf-8").read() if os.path.exists(bank_file) else rd("cfg3_bank.js")
-print("question bank:", "PRIVATE full bank" if os.path.exists(bank_file) else "sample bank (src/cfg3_bank.js)")
+enc_file = os.path.join(SRC, "cfg3_bank.enc.json")
+bank_key = os.environ.get("OBQ_BANK_KEY", "").strip()
+key_file = os.path.join(PRIV, "bank.key")
+if not bank_key and os.path.exists(key_file): bank_key = open(key_file, encoding="utf-8").read().strip()
+if os.path.exists(bank_file):
+    bank_src = open(bank_file, encoding="utf-8").read(); print("question bank: PRIVATE override (private/cfg3_bank.js)")
+elif os.path.exists(enc_file) and bank_key:
+    import json as _j
+    enc = _j.load(open(enc_file, encoding="utf-8"))
+    parts = [bank_key[i:i + 4] for i in range(0, len(bank_key), 4)][::-1]          # light obfuscation only; the page needs the key to decrypt
+    bank_src = ("/* built-in question bank, encrypted. rows: %d */\nvar STARTER_BANK = [];\nvar BANK_ENC = %s;\nvar BANK_PASS = %s.reverse().join(\"\");\n"
+                % (enc["rows"], _j.dumps({"iv": enc["iv"], "ct": enc["ct"]}), _j.dumps(parts)))
+    print("question bank: ENCRYPTED full bank (%d questions) - key found" % enc["rows"])
+else:
+    bank_src = rd("cfg3_bank.js"); print("question bank: sample bank (src/cfg3_bank.js)" + (" - encrypted bank present but no key (OBQ_BANK_KEY / private/bank.key)" if os.path.exists(enc_file) else ""))
 cfg = "\n".join([rd(n) for n in ["cfg1.js", "cfg2_en.js", "cfg2_hi_ml.js", "cfg2_or_ta.js", "cfg2_te_pa_bn.js", "cfg2_ne_ur_mr.js", "cfg2_extra.js", "cfg3.js"]] + [bank_src, rd("cfg4_verses.js")])
 fb_file = os.path.join(PRIV, "firebase.config.json")
 if os.path.exists(fb_file):

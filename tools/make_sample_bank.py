@@ -20,8 +20,8 @@ for book, items in by_book.items():
     def take(pred, key=None):
         for r in sorted([x for x in items if x not in picked and pred(x)], key=key or (lambda x: 0)):
             picked.append(r); return
-    take(lambda r: "multiple" in cat(r) and regular(r))            # one regular multiple choice
-    take(lambda r: cat(r).startswith("one") and regular(r))         # one regular question
+    take(lambda r: "multiple" in cat(r) and regular(r))                 # one regular multiple choice
+    take(lambda r: cat(r).startswith("one") and regular(r))             # one regular question
     take(lambda r: True, key=lambda r: kinds[kind(r)])                  # then the rarest kind, so every kind appears in the sample
     out += picked[:per]
 wb = Workbook(); w = wb.active; w.title = "Questions"; w.append(head)
