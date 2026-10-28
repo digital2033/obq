@@ -1,0 +1,217 @@
+
+  /* =====================================================================
+     RESULTS PDF  (drawn on a canvas so every script is shaped correctly)
+     ===================================================================== */
+  function pdfFont() {
+    return langInfo(ui).font + ', "Noto Sans Malayalam", "Noto Sans Devanagari", "Noto Sans Tamil", "Noto Sans Telugu", "Noto Sans Oriya", "Noto Sans Gurmukhi", "Noto Sans Bengali", "Noto Naskh Arabic", "DM Sans", "Nirmala UI", system-ui, sans-serif';
+  }
+  function srcLabel(c) { return c.source === "bank" ? T("srcBank") : (c.source === "kb" ? T("srcKB") : (c.source === "sample" ? T("srcSample") : T("srcRandom"))); }
+  function langLabel(code) { var L = langInfo(code); if (L.code !== code) return code ? code.charAt(0).toUpperCase() + code.slice(1) : ""; return L.code === "en" ? "English" : L.native + " (" + L.english + ")"; }
+  function detailRows() {
+    var c = cfg, u = user || {};
+    return [
+      [T("dQM"), c.qm], [T("dEmail"), u.email || "-"],
+      [T("dOrg"), u.org || "-"], [T("dEvent"), c.event],
+      [T("dDate"), fmtDate(c.date)], [T("dParts"), c.parts ? String(c.parts) : "-"],
+      [T("dQLang"), c.quizLangLabel || langLabel(c.quizLang)], [T("dNumQ"), String(ROUNDS.length)],
+      [T("dMode"), isGroup() ? T("mGroup") : T("mInd")], [T("dStyle"), c.style === "simple" ? T("styleSimple") : T("styleNormal")]
+    ];
+  }
+  function loadLogo() {
+    return new Promise(function (res) {
+      if (!S.logo || S.logo === "@logo" || (location.protocol === "file:" && !/^data:/.test(S.logo))) { res(null); return; }
+      var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = S.logo;
+    });
+  }
+  function drawResultPages(list, logo) {
+    var W = 1240, H = 1754, M = 90, ROW = 74, FONT = pdfFont(), C = S.colors, group = isGroup();
+    var firstTop = 1060, nextTop = 250, bottom = H - 130;
+    var perFirst = Math.max(1, Math.floor((bottom - firstTop) / ROW)), perNext = Math.max(1, Math.floor((bottom - nextTop) / ROW));
+    var chunks = [], i = 0, first = true;
+    do { var cap = first ? perFirst : perNext; chunks.push(list.slice(i, i + cap)); i += cap; first = false; } while (i < list.length);
+    var total = chunks.length, winners = list.filter(function (x) { return x.rank === 1; }).map(function (x) { return x.name; });
+    var rows = detailRows(), ev = cfg.event, dstr = fmtDate(cfg.date);
+
+    return chunks.map(function (chunk, pi) {
+      var c = document.createElement("canvas"); c.width = W; c.height = H;
+      var g = c.getContext("2d");
+      function dirOf(t) { return /[\u0590-\u08FF]/.test(t) ? "rtl" : "ltr"; }
+      function text(t, x, y, size, weight, color, align) {
+        g.font = weight + " " + size + "px " + FONT; g.fillStyle = color; g.textAlign = align || "left"; g.direction = dirOf(String(t)); g.fillText(t, x, y);
+      }
+      function width(t, size, weight) { g.font = weight + " " + size + "px " + FONT; return g.measureText(t).width; }
+      function fitText(t, maxW, size, weight) {
+        t = String(t);
+        if (width(t, size, weight) <= maxW) return t;
+        while (t.length > 1 && width(t + "\u2026", size, weight) > maxW) t = t.slice(0, -1);
+        return t + "\u2026";
+      }
+      function wrap(t, maxW, size, weight, maxLines) {
+        var words = String(t).split(/\s+/), lines = [], cur = "";
+        words.forEach(function (w) {
+          var tryL = cur ? cur + " " + w : w;
+          if (width(tryL, size, weight) <= maxW || !cur) cur = tryL; else { lines.push(cur); cur = w; }
+        });
+        if (cur) lines.push(cur);
+        if (lines.length > maxLines) { lines = lines.slice(0, maxLines); lines[maxLines - 1] = fitText(lines[maxLines - 1] + " \u2026", maxW, size, weight); }
+        return lines;
+      }
+      g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H); g.textBaseline = "alphabetic";
+      var top;
+      if (pi === 0) {
+        g.fillStyle = C.bg; g.fillRect(0, 0, W, 330); g.fillStyle = C.accent; g.fillRect(0, 330, W, 10);
+        if (logo) { var lh = 110, lw = logo.width * lh / logo.height; g.drawImage(logo, W - M - lw, 40, lw, lh); }
+        text(fitText(S.appName, W - 2 * M - 220, 32, 700), M, 90, 32, 700, C.muted);
+        var esz = 64; while (esz > 44 && width(ev, esz, 800) > W - 2 * M) esz -= 4;
+        var el2 = width(ev, esz, 800) > W - 2 * M ? wrap(ev, W - 2 * M, 44, 800, 2) : [ev];
+        el2.forEach(function (ln, li) { text(ln, M, 160 + li * 50, el2.length > 1 ? 44 : esz, 800, C.accent); });
+        var ty = el2.length > 1 ? 262 : 245;
+        text(T("pdfTitle"), M, ty, 40, 700, C.ink);
+        text(dstr + "   |   " + (group ? T("grp") : T("ppl")), M, ty + 50, 30, 500, C.muted);
+        // event details
+        var colW = (W - 2 * M) / 2, gy = 392, k;
+        for (k = 0; k < rows.length; k++) {
+          var cx = M + (k % 2) * colW, cy = gy + Math.floor(k / 2) * 50 + 34, lab = rows[k][0] + ": ";
+          text(lab, cx, cy, 24, 500, "#7A6A5C");
+          var lw2 = width(lab, 24, 500);
+          text(fitText(rows[k][1], colW - lw2 - 24, 28, 700), cx + lw2, cy, 28, 700, "#1B1410");
+        }
+        var sy = gy + Math.ceil(rows.length / 2) * 50 + 16;
+        text(T("dScope") + ":", M, sy + 26, 24, 500, "#7A6A5C");
+        var sl = wrap(scopeLabel(cfg), W - 2 * M, 28, 700, 2);
+        sl.forEach(function (ln, li) { text(ln, M, sy + 62 + li * 38, 28, 700, "#1B1410"); });
+        var srcY = sy + 62 + (sl.length - 1) * 38 + 52, srcLab = T("dSource") + ": ", srcLW = width(srcLab, 24, 500);
+        text(srcLab, M, srcY, 24, 500, "#7A6A5C");
+        text(fitText(srcLabel(cfg), W - 2 * M - srcLW, 28, 700), M + srcLW, srcY, 28, 700, "#1B1410");
+        // winner
+        var wy = srcY + 72;
+        if (winners.length) {
+          var label = (winners.length > 1 ? T("winsL") : T("winL")) + " ", labelW = width(label, 46, 800);
+          text(label, M, wy, 46, 800, "#7A6A5C");
+          text(fitText(winners.join(", "), W - 2 * M - labelW, 46, 800), M + labelW, wy, 46, 800, "#1B1410");
+        } else text(T("noWin"), M, wy, 40, 700, "#1B1410");
+        top = firstTop;
+      } else {
+        g.fillStyle = C.bg; g.fillRect(0, 0, W, 150);
+        text(fitText(ev + " - " + T("pdfTitle"), W - 2 * M, 38, 700), M, 80, 38, 700, C.accent);
+        text(dstr, M, 126, 30, 500, C.muted);
+        top = nextTop;
+      }
+      g.fillStyle = "#FDE8D0"; g.fillRect(M, top - ROW, W - 2 * M, ROW);
+      text(T("rank"), M + 30, top - 24, 32, 700, "#1B1410");
+      text(group ? T("grpC") : T("nameC"), M + 230, top - 24, 32, 700, "#1B1410");
+      text(T("ptsC"), W - M - 30, top - 24, 32, 700, "#1B1410", "right");
+      var rankColors = { 1: "#B8860B", 2: "#6F768A", 3: "#A0612B" };
+      chunk.forEach(function (x, kk) {
+        var y = top + kk * ROW;
+        if (kk % 2 === 0) { g.fillStyle = "#FFF5EA"; g.fillRect(M, y, W - 2 * M, ROW); }
+        var base = y + 50;
+        text(String(x.rank), M + 30, base, 36, 800, rankColors[x.rank] || "#1B1410");
+        text(fitText(x.name, W - 2 * M - 230 - 280, 36, 500), M + 230, base, 36, 500, "#1B1410");
+        text(String(x.total), W - M - 30, base, 38, 800, "#1B1410", "right");
+      });
+      g.fillStyle = C.bg; g.fillRect(M, top + chunk.length * ROW, W - 2 * M, 3);
+      text(fitText(S.appName + " - " + ev, W - 2 * M - 260, 26, 500), M, H - 60, 26, 500, "#7A6A5C");
+      text(T("page", { a: pi + 1, b: total }), W - M, H - 60, 26, 500, "#7A6A5C", "right");
+      return c;
+    });
+  }
+  function canvasJpeg(c) {
+    var b64s = c.toDataURL("image/jpeg", 0.92).split(",")[1], bin = atob(b64s), u = new Uint8Array(bin.length), i;
+    for (i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return u;
+  }
+  /* A small PDF writer: one A4 page per picture */
+  function makePdf(jpegs, w, h) {
+    var parts = [], offsets = [], size = 0;
+    function enc(str) { var a = new Uint8Array(str.length); for (var i = 0; i < str.length; i++) a[i] = str.charCodeAt(i) & 255; return a; }
+    function push(u8) { parts.push(u8); size += u8.length; }
+    function obj(n, head, stream) {
+      offsets[n] = size; push(enc(n + " 0 obj\n" + head));
+      if (stream) { push(enc("\nstream\n")); push(stream); push(enc("\nendstream")); }
+      push(enc("\nendobj\n"));
+    }
+    function pad10(n) { var t = String(n); while (t.length < 10) t = "0" + t; return t; }
+    var n = jpegs.length, i;
+    push(enc("%PDF-1.4\n%\u00E2\u00E3\u00CF\u00D3\n"));
+    obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    var kids = []; for (i = 0; i < n; i++) kids.push((3 + 3 * i) + " 0 R");
+    obj(2, "<< /Type /Pages /Kids [" + kids.join(" ") + "] /Count " + n + " >>");
+    for (i = 0; i < n; i++) {
+      obj(3 + 3 * i, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 " + (5 + 3 * i) + " 0 R >> >> /Contents " + (4 + 3 * i) + " 0 R >>");
+      var content = enc("q 595.28 0 0 841.89 0 0 cm /Im0 Do Q");
+      obj(4 + 3 * i, "<< /Length " + content.length + " >>", content);
+      obj(5 + 3 * i, "<< /Type /XObject /Subtype /Image /Width " + w + " /Height " + h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + jpegs[i].length + " >>", jpegs[i]);
+    }
+    var xrefPos = size, count = 3 * n + 3, x = "xref\n0 " + count + "\n0000000000 65535 f \n";
+    for (i = 1; i < count; i++) x += pad10(offsets[i]) + " 00000 n \n";
+    x += "trailer\n<< /Size " + count + " /Root 1 0 R >>\nstartxref\n" + xrefPos + "\n%%EOF";
+    push(enc(x));
+    var out = new Uint8Array(size), pos = 0;
+    parts.forEach(function (p) { out.set(p, pos); pos += p.length; });
+    return out;
+  }
+  function pdfName() {
+    var slug = String(cfg.event || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
+    return S.pdfFilePrefix + (slug ? "-" + slug : "") + "-" + (cfg.date || todayISO()) + ".pdf";
+  }
+  function exportResults() {
+    var msg = $("exportMsg"); msg.textContent = T("pdfMaking");
+    var list = totals(), f = langInfo(ui).font;
+    var fonts = (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load("700 30px " + f), document.fonts.load("400 30px " + f)]).catch(function () {}) : Promise.resolve();
+    Promise.all([fonts, loadLogo()]).then(function (res) {
+      var pages = drawResultPages(list, res[1]);
+      return saveFile(pdfName(), makePdf(pages.map(canvasJpeg), 1240, 1754), "application/pdf");
+    }).then(function (saved) {
+      msg.textContent = saved ? T("pdfSaved") : "";
+      if (saved) { bump("pdfs"); track("pdf_export", { rows: list.length, questions: ROUNDS.length }); }
+    }).catch(function () { msg.textContent = T("pdfFail"); });
+  }
+
+  /* =====================================================================
+     START UP
+     ===================================================================== */
+  function repaintStatic() {
+    paintSelects(); paintBankInfo(); paintSoundLabel(); paintTimer(); paintFs();
+    if ($("dashboard").classList.contains("active")) paintDashboard();
+    if ($("game").classList.contains("active")) paintRound();
+    if (!$("setup").classList.contains("active") && !$("auth").classList.contains("active")) return;
+    refreshAvail();
+  }
+  function restoreSession() {
+    var key = lsGet("qms.session", "");
+    if (key === "skip") { if (S.skipLoginButton) onLogin(skipProfile(), false); return; }
+    var u = key ? localUsers()[key] : null;
+    if (u) onLogin(u.profile, false);
+  }
+  function boot() {
+    applyColors(); paintBrand();
+    var saved = lsGet("qms.ui", S.defaultUiLang);
+    quizLangPick = S.defaultQuizLang; quizLang = quizLangPick; sel.numQ = S.questionCounts[0];
+    wireAuth(); wireSetup(); wireGame();
+    window.addEventListener("resize", function () { var a = document.activeElement; if (a && a.tagName === "INPUT") return; fitSoon(); });
+    window.addEventListener("orientationchange", function () { setTimeout(fitSoon, 250); });
+    document.addEventListener("fullscreenchange", function () { paintFs(); setTimeout(fitSoon, 150); });
+    document.addEventListener("webkitfullscreenchange", paintFs);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && $("game").classList.contains("active")) keepAwake(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSoon);
+    try { var full = window.matchMedia && window.matchMedia("(display-mode: fullscreen)").matches; if (!fsSupported() || full) $("fs").style.display = "none"; } catch (x) {}
+    $("fs").addEventListener("click", toggleFs); $("exitFs").addEventListener("click", exitFs); $("exitFs2").addEventListener("click", exitFs);
+    setUi(saved);
+    show("auth");
+    if (!S.requireLogin) {
+      user = { email: "", name: "", org: "", country: "", usage: "", consent: true }; loadBank(); goHomePage(); return;
+    }
+    initFirebase().then(function (on) {
+      paintSelects();
+      if (on) {
+        var first = true;
+        fb.auth.onAuthStateChanged(function (u) {
+          if (!first) return; first = false;
+          if (u) { if (needsVerify(u)) showVerify(u.email); else fbProfile(u).then(function (p) { onLogin(p, false); }); } else restoreSession();
+        });
+      } else restoreSession();
+    });
+  }
+  boot();
+})();

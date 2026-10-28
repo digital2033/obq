@@ -1,0 +1,418 @@
+<body data-screen="auth">
+<div id="app">
+
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <img id="logo" alt="" hidden>
+      <div><div class="bname" id="bname"></div><div class="btag" id="btag"></div></div>
+    </div>
+    <div class="tb-right" id="tbRight" hidden>
+      <button class="ghost sm" id="exitFs" type="button" hidden data-i18n="exitFs"></button>
+      <button class="ghost sm" id="goHome" type="button" data-i18n="home"></button>
+      <button class="ghost sm" id="goHelp" type="button" data-i18n="helpBtn"></button>
+      <button class="ghost sm" id="goDash" type="button" data-i18n="dashBtn"></button>
+      <button class="ghost sm" id="goAdmin" type="button" hidden data-i18n="adminBtn"></button>
+      <span class="uchip" id="uchip"></span>
+      <button class="ghost sm" id="signOutBtn" type="button" data-i18n="signOut"></button>
+    </div>
+  </header>
+
+  <!-- ================= SIGN IN / SIGN UP ================= -->
+  <section class="screen" id="auth">
+    <img class="authlogo" id="authLogo" alt="" hidden>
+    <div class="card narrow">
+      <div class="lang-row"><label class="sr" for="authLang" data-i18n="uiLang"></label><select id="authLang"></select></div>
+      <div class="tabs" id="authTabs" role="tablist">
+        <button type="button" id="tabIn" role="tab" aria-selected="true" data-i18n="tabIn"></button>
+        <button type="button" id="tabUp" role="tab" aria-selected="false" data-i18n="tabUp"></button>
+      </div>
+      <div class="authform" id="formIn">
+        <div class="field"><label for="inEmail" data-i18n="email"></label><input type="email" id="inEmail" autocomplete="email"></div>
+        <div class="field"><label for="inPass" data-i18n="pass"></label><input type="password" id="inPass" autocomplete="current-password"></div>
+        <button class="primary" type="button" id="btnIn" data-i18n="btnIn"></button>
+        <button class="link" type="button" id="forgotBtn" data-i18n="forgot"></button>
+      </div>
+      <div class="authform" id="formUp" hidden>
+        <div class="field"><label for="upName" data-i18n="fullName"></label><input type="text" id="upName" autocomplete="name" maxlength="80"></div>
+        <div class="field"><label for="upEmail" data-i18n="email"></label><input type="email" id="upEmail" autocomplete="email"></div>
+        <div class="field"><label for="upOrg" data-i18n="org"></label><input type="text" id="upOrg" autocomplete="organization" maxlength="100"></div>
+        <div class="field"><label for="upCountry" data-i18n="country"></label><input type="text" id="upCountry" autocomplete="country-name" maxlength="60"></div>
+        <div class="field"><label for="upUsage" data-i18n="usage"></label><select id="upUsage"></select></div>
+        <div class="field"><label for="upPass" data-i18n="pass"></label><input type="password" id="upPass" autocomplete="new-password"></div>
+        <label class="check"><input type="checkbox" id="upConsent" checked><span data-i18n="consent"></span></label>
+        <button class="primary" type="button" id="btnUp" data-i18n="btnUp"></button>
+      </div>
+      <button class="ghost" id="skipLogin" type="button" hidden data-i18n="skipLogin"></button>
+      <div class="authform" id="verifyBox" hidden>
+        <h2 class="gh" data-i18n="verifyTitle"></h2>
+        <p class="note" id="verifyMsg"></p>
+        <button class="primary" id="verifyDone" type="button" data-i18n="verifyDone"></button>
+        <button class="ghost" id="verifyResend" type="button" data-i18n="verifyResend"></button>
+        <button class="link" id="verifyOut" type="button" data-i18n="verifyOut"></button>
+        <div class="note" id="verifyStatus" aria-live="polite"></div>
+      </div>
+      <div class="err" id="authErr" role="alert"></div>
+      <div class="note" id="authNote" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ================= HOME ================= -->
+  <section class="screen" id="home">
+    <div class="homewrap">
+      <div class="homegrid">
+        <div class="card hero">
+          <img class="herologo" id="homeLogo" alt="" hidden>
+          <h1 class="ptitle" id="homeWelcome"></h1>
+          <p class="lead" data-i18n="homeAbout"></p>
+          <ul class="aboutlist">
+            <li data-i18n="homeA1"></li>
+            <li data-i18n="homeA2"></li>
+            <li data-i18n="homeA3"></li>
+          </ul>
+          <p class="note" data-i18n="homeNew"></p>
+        </div>
+        <div class="cards" id="homeCards"></div>
+      </div>
+      <div class="card votd" id="votdBox">
+        <h2 class="gh" data-i18n="votdTitle"></h2>
+        <blockquote id="votdText"></blockquote>
+        <div class="votdref"><b id="votdRef"></b><small id="votdSrc"></small></div>
+        <div class="row"><button class="ghost sm" id="votdNext" type="button" data-i18n="votdNext"></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OBQ LITE ================= -->
+  <section class="screen" id="lite">
+    <div class="card">
+      <h1 class="ptitle" data-i18n="liteTitle"></h1>
+      <p class="note" data-i18n="liteIntro"></p>
+      <div class="fgrid">
+        <div class="field"><label for="lName" data-i18n="liteName"></label><input type="text" id="lName" maxlength="80" autocomplete="off"></div>
+        <div class="field"><label for="lLang" data-i18n="quizLang"></label><select id="lLang"></select></div>
+        <div class="field" id="lOtherWrap" hidden><label for="lOther" data-i18n="langOtherLbl"></label><input type="text" id="lOther" maxlength="40" autocomplete="off"></div>
+        <div class="field"><label for="lPart" data-i18n="liteScopeL"></label><select id="lPart"></select></div>
+      </div>
+      <div class="field"><span class="lbl" data-i18n="numQ"></span><div class="segchoice" id="lCounts"></div></div>
+      <div class="field">
+        <span class="lbl" data-i18n="mode"></span>
+        <div class="modes" role="group">
+          <button class="mode" type="button" data-lmode="individual" aria-pressed="true"><span class="mt" data-i18n="mInd"></span></button>
+          <button class="mode" type="button" data-lmode="group" aria-pressed="false"><span class="mt" data-i18n="mGroup"></span></button>
+        </div>
+      </div>
+      <label class="check" id="lReadWrap"><input type="checkbox" id="lRead"><span data-i18n="fRead"></span></label>
+      <div class="note" id="liteAvail" aria-live="polite"></div>
+      <div class="err" id="liteErr" role="alert"></div>
+      <div class="row"><button class="primary" id="liteStart" type="button" data-i18n="begin"></button><button class="ghost" id="liteHome" type="button" data-i18n="home"></button></div>
+    </div>
+  </section>
+
+  <!-- ================= SET UP ================= -->
+  <section class="screen" id="setup">
+    <div class="card">
+      <h1 class="ptitle" data-i18n="setupTitle"></h1>
+      <div class="panel2" id="savedBox" hidden>
+        <h2 data-i18n="savedTitle"></h2>
+        <div class="okmsg" id="savedMsg" aria-live="polite"></div>
+        <div class="okmsg" id="upcoming"></div>
+        <div id="savedList"></div>
+      </div>
+      <div class="fgrid">
+        <div class="field"><label for="fQM" data-i18n="qmName"></label><input type="text" id="fQM" maxlength="80" autocomplete="off"></div>
+        <div class="field"><label for="fEvent" data-i18n="eventName"></label><input type="text" id="fEvent" maxlength="120" autocomplete="off"><small data-i18n="eventHelp"></small></div>
+        <div class="field"><label for="fDate" data-i18n="eventDate"></label><input type="date" id="fDate"></div>
+        <div class="field"><label for="fParts" data-i18n="parts"></label><input type="number" id="fParts" min="1" max="10000" inputmode="numeric"></div>
+        <div class="field"><label for="fUiLang" data-i18n="uiLang"></label><select id="fUiLang"></select></div>
+        <div class="field"><label for="fQuizLang" data-i18n="quizLang"></label><select id="fQuizLang"></select></div>
+        <div class="field" id="otherWrap" hidden><label for="fOtherLang" data-i18n="langOtherLbl"></label><input type="text" id="fOtherLang" maxlength="40" autocomplete="off"></div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i18n="mode"></span>
+        <div class="modes" role="group">
+          <button class="mode" type="button" data-mode="individual" aria-pressed="true"><span class="mt" data-i18n="mInd"></span><span class="md" data-i18n="mIndD"></span></button>
+          <button class="mode" type="button" data-mode="group" aria-pressed="false"><span class="mt" data-i18n="mGroup"></span><span class="md" data-i18n="mGroupD"></span></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i18n="styleTitle"></span>
+        <div class="modes" role="group">
+          <button class="mode" type="button" data-style="normal" aria-pressed="true"><span class="mt" data-i18n="styleNormal"></span><span class="md" data-i18n="styleNormalD"></span></button>
+          <button class="mode" type="button" data-style="simple" aria-pressed="false"><span class="mt" data-i18n="styleSimple"></span><span class="md" data-i18n="styleSimpleD"></span></button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fScope" data-i18n="scope"></label>
+        <select id="fScope"></select>
+        <div id="bookWrap" hidden>
+          <div class="pickinfo" id="pickInfo" aria-live="polite"></div>
+          <div class="bk-head" data-i18n="ot"></div><div class="books" id="booksOT"></div>
+          <div class="bk-head" data-i18n="nt"></div><div class="books" id="booksNT"></div>
+        </div>
+        <div class="note" id="scopeAuto" hidden data-i18n="scopeAuto"></div>
+      </div>
+
+      <div class="field"><span class="lbl" data-i18n="numQ"></span><div class="segchoice" id="qCounts"></div></div>
+
+      <div class="field">
+        <span class="lbl" data-i18n="source"></span>
+        <label class="radio" id="srcBWrap"><input type="radio" name="src" value="builtin" id="srcB" checked><span data-i18n="srcRandom"></span></label>
+        <label class="radio"><input type="radio" name="src" value="bank" id="srcU"><span><span data-i18n="srcBank"></span> <small id="bankInfo"></small></span></label>
+        <label class="radio"><input type="radio" name="src" value="kb" id="srcK"><span><span data-i18n="srcKB"></span> <small id="kbInfo"></small></span></label>
+        <div class="note" id="availTxt" aria-live="polite"></div>
+      </div>
+
+      <label class="check" id="readWrap"><input type="checkbox" id="fRead"><span data-i18n="fRead"></span></label>
+      <label class="check" id="saveResWrap" hidden><input type="checkbox" id="fSaveRes" checked><span data-i18n="fSaveRes"></span></label>
+      <div class="err" id="setupErr" role="alert"></div>
+      <div class="row">
+        <button class="primary" id="begin" type="button" data-i18n="begin"></button>
+        <button class="ghost" id="trySample" type="button" data-i18n="trySample"></button>
+        <button class="ghost" id="saveSetupBtn" type="button" data-i18n="saveSetup"></button>
+      </div>
+      <div class="panel2" id="saveForm" hidden>
+        <div class="field"><label for="ssName" data-i18n="ssName"></label><input type="text" id="ssName" maxlength="60" autocomplete="off"></div>
+        <label class="radio"><input type="radio" name="sskind" id="ssTpl" checked><span data-i18n="ssTemplate"></span></label>
+        <label class="radio"><input type="radio" name="sskind" id="ssEvt"><span data-i18n="ssEvent"></span></label>
+        <label class="check"><input type="checkbox" id="ssFreeze"><span data-i18n="ssFreeze"></span></label>
+        <div class="row"><button class="primary" id="ssSave" type="button" data-i18n="ssSave"></button></div>
+        <div class="note" id="ssMsg" aria-live="polite"></div>
+      </div>
+      <div class="keys small" id="keysHelp"></div>
+    </div>
+  </section>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section class="screen" id="dashboard">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="dashTitle"></h1><div class="row"><button class="primary" id="qmGuideBtn" type="button" data-i18n="qmGuideBtn"></button><button class="ghost" id="dashBack" type="button" data-i18n="home"></button></div></div>
+
+      <div class="panel2" id="panelBank">
+        <h2 data-i18n="bankTitle"></h2>
+        <p class="note" data-i18n="bankIntro"></p>
+        <div class="row">
+          <button class="ghost icon-btn" id="dlTpl" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-i18n="dlTpl"></span></button>
+          <button class="primary" id="upBtn" type="button" data-i18n="upload"></button>
+          <input type="file" id="fileIn" accept=".xlsx,.xls,.csv" hidden>
+          <button class="ghost" id="clearBank" type="button" data-i18n="clearBank"></button>
+        </div>
+        <label class="check"><input type="checkbox" id="addMode"><span data-i18n="addMode"></span></label>
+        <div class="note" id="upMsg" aria-live="polite"></div>
+        <div id="bankStats"></div>
+        <div class="tablewrap"><table class="bt" id="bankTable"></table></div>
+      </div>
+
+      <div class="panel2" id="panelKb">
+        <h2 data-i18n="kbTitle"></h2>
+        <p class="note" data-i18n="kbIntro"></p>
+        <div class="fgrid">
+          <div class="field"><label for="fKbLang" data-i18n="kbLang"></label><select id="fKbLang"></select></div>
+          <div class="field" id="kbOtherWrap" hidden><label for="fKbOther" data-i18n="langOtherLbl"></label><input type="text" id="fKbOther" maxlength="40" autocomplete="off"></div>
+          <div class="field"><label for="fKbName" data-i18n="kbName"></label><input type="text" id="fKbName" maxlength="60" autocomplete="off"></div>
+        </div>
+        <div class="row"><button class="primary" id="kbUp" type="button" data-i18n="kbFiles"></button><input type="file" id="kbFiles" accept=".zip,.usfm,.sfm,.usx,.usfx,.xml,.txt" multiple hidden>
+          <button class="ghost" id="kbBundleBtn" type="button" data-i18n="kbBundle"></button><input type="file" id="kbBundleFile" accept=".zip" hidden></div>
+        <h3 class="gh2" data-i18n="bbTitle"></h3>
+        <p class="note" data-i18n="bbIntro"></p>
+        <div class="fgrid">
+          <div class="field"><label for="fKbKey" data-i18n="kbKey"></label><input type="password" id="fKbKey" autocomplete="off"><small data-i18n="kbKeyNote"></small></div>
+          <div class="field"><label>&nbsp;</label><button class="primary" id="bbLoad" type="button" data-i18n="bbLoad"></button></div>
+        </div>
+        <div class="fgrid">
+          <div class="field"><label for="bbCountry" data-i18n="bbCountry"></label><select id="bbCountry" disabled></select></div>
+          <div class="field"><label for="bbLang" data-i18n="bbLangL"></label><select id="bbLang" disabled></select></div>
+        </div>
+        <div class="note" id="bbMsg" aria-live="polite"></div>
+        <div class="tablewrap"><table class="bt" id="bbTable"></table></div>
+        <div class="fgrid">
+          <div class="field"><label for="fKbFs" data-i18n="kbFs"></label><input type="text" id="fKbFs" autocomplete="off"><small data-i18n="bbManual"></small></div>
+          <div class="field"><label>&nbsp;</label><button class="ghost" id="kbDl" type="button" data-i18n="kbDl"></button></div>
+        </div>
+        <div class="note" id="kbMsg" aria-live="polite"></div>
+        <div id="kbList"></div>
+        <div id="kbPrev"></div>
+      </div>
+
+      <div class="panel2" id="panelHist">
+        <h2 data-i18n="histTitle"></h2>
+        <p class="note" data-i18n="histIntro"></p>
+        <div class="row"><button class="ghost" id="histAll" type="button" hidden data-i18n="histAll"></button></div>
+        <div id="histList"></div>
+      </div>
+
+      <div class="panel2" id="panelOwn">
+        <h2 data-i18n="ownTitle"></h2>
+        <p class="note" data-i18n="ownIntro"></p>
+        <div class="note" id="ownStatus"></div>
+        <textarea id="fOwnCfg" rows="6" spellcheck="false" placeholder="const firebaseConfig = { apiKey: &quot;...&quot;, projectId: &quot;...&quot;, appId: &quot;...&quot; };"></textarea>
+        <div class="row">
+          <button class="primary" id="ownConnect" type="button" data-i18n="ownConnect"></button>
+          <button class="ghost" id="ownFileBtn" type="button" data-i18n="ownFile"></button><input type="file" id="ownFile" accept=".js,.json,.txt" hidden>
+          <button class="ghost" id="ownDisconnect" type="button" hidden data-i18n="ownDisconnect"></button>
+          <button class="ghost" id="ownHelp" type="button" data-i18n="ownHelp"></button>
+        </div>
+        <div class="note" id="ownMsg" aria-live="polite"></div>
+        <p class="note" data-i18n="ownRulesNote"></p>
+        <pre class="rulesbox" id="ownRules"></pre>
+      </div>
+
+      <div class="panel2" id="panelActivity">
+        <h2 data-i18n="activity"></h2>
+        <div class="stats" id="stats"></div>
+        <div class="note" id="fbStatus"></div>
+      </div>
+
+      <div class="panel2" id="panelRemote">
+        <h2 data-i18n="remoteTitle"></h2>
+        <p class="note" data-i18n="remoteHelp"></p>
+        <div class="remoteout" id="remoteOut" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!--QMGUIDE-->
+  <!-- ================= OWN FIREBASE: STEP-BY-STEP ================= -->
+  <section class="screen" id="ownguide">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="guideTitle"></h1>
+        <div class="row"><button class="ghost" id="guideBack" type="button" data-i18n="back2builder"></button><button class="ghost" id="guideHome" type="button" data-i18n="home"></button></div></div>
+      <p class="note"><b>Optional.</b> You only need this if you want a backup copy of your quiz results in your own cloud database. Without it, your results stay on this device and you can still download them as PDF or CSV. It takes about 10 minutes and is free for normal use (Firebase "Spark" plan). The screens in the Firebase console change from time to time, so names may differ slightly.</p>
+      <ol class="steps">
+        <li><b>Create a Firebase project.</b> Open <code>console.firebase.google.com</code> and sign in with a Google account. Click <b>Create a project</b> (or <b>Add project</b>), give it a name such as <code>my-obq-results</code>, and continue. Google Analytics is not needed: you can switch it off, then click <b>Create project</b>.</li>
+        <li><b>Register a web app.</b> On the project's home page click the web icon <code>&lt;/&gt;</code> (<b>Add app</b>, then <b>Web</b>). Type a nickname such as <code>OBQ</code>. Leave "Firebase Hosting" unticked and click <b>Register app</b>. Firebase now shows a block starting <code>const firebaseConfig = {</code>. Keep this window open: you will copy that block in step 6.</li>
+        <li><b>Allow anonymous sign-in.</b> In the left menu open <b>Build</b>, then <b>Authentication</b>, then <b>Get started</b>. On the <b>Sign-in method</b> tab choose <b>Anonymous</b>, switch <b>Enable</b> on, and click <b>Save</b>. This lets OBQ add records to your database without asking you to sign in again.</li>
+        <li><b>Create the database.</b> In the left menu open <b>Build</b>, then <b>Firestore Database</b>, then <b>Create database</b>. If asked for an edition, choose <b>Standard</b>. Choose a location close to you (for example <code>asia-south1</code> for India), because it cannot be changed later. Choose <b>Start in production mode</b> and click <b>Enable</b> (or <b>Create</b>).</li>
+        <li><b>Publish the rules.</b> In Firestore Database open the <b>Rules</b> tab. Delete everything in the box, paste the rules below, and click <b>Publish</b>. These rules let OBQ add a result record but stop anyone from reading, changing or deleting data from a web page. You read your results in the Firebase console.</li>
+        <li><b>Connect it here.</b> Go back to the Quiz Builder, find <b>My Firebase</b>, paste the whole <code>firebaseConfig</code> block from step 2 (or save it in a text file and use <b>Upload config file</b>), then click <b>Connect</b>. You should see "Connected to project ...". If you closed the window in step 2: Firebase console, the gear icon, <b>Project settings</b>, scroll to <b>Your apps</b>, and copy the config from there.</li>
+        <li><b>Try it.</b> On the setup page the tick box "Send the results to my own Firebase when the quiz ends" now appears. Run a quiz to the end (a sample quiz is not sent). The final screen says "Results sent to your Firebase". In the Firebase console open <b>Firestore Database</b>, then <b>Data</b>: you will see a collection <code>obq_results</code> with one record per quiz.</li>
+      </ol>
+      <h2 class="gh">Rules to paste in step 5</h2>
+      <pre class="rulesbox" id="guideRules"></pre>
+      <div class="row"><button class="primary" id="guideCopy" type="button" data-i18n="guideCopy"></button><span class="okmsg" id="guideCopied"></span></div>
+      <h2 class="gh">Good to know</h2>
+      <ul class="steps">
+        <li><b>Your data, your responsibility.</b> The records include participant names. They are stored in your project, not in OBQ's cloud. Tell participants that their names and points are kept, and delete records you no longer need (Firestore Data, select a record, delete).</li>
+        <li><b>The config is not a password</b> and is safe in this browser, but it is only saved on this device. Enter it again on another phone or computer. Use <b>Disconnect</b> to remove it.</li>
+        <li><b>Spreadsheet copy.</b> You can always download the same results as CSV from the final screen or from the Quiz Builder. Exporting everything from Firebase itself needs the paid Blaze plan, so most people use the CSV.</li>
+        <li><b>Another device or a new quiz master?</b> Each Quiz Master connects their own project. Several people can also share one project: use the same config.</li>
+      </ul>
+      <h2 class="gh">If something does not work</h2>
+      <ul class="steps">
+        <li><b>"Could not send the results".</b> Check that Anonymous sign-in is enabled (step 3) and that the rules were published in <b>Firestore</b> (step 5), not in Realtime Database. The Realtime Database editor accepts only JSON and shows "Parse error" for these rules.</li>
+        <li><b>"Could not load Firebase".</b> Firebase cannot connect from inside a claude.ai preview or without internet. Use the app at your own web address.</li>
+        <li><b>"Could not find apiKey, projectId and appId".</b> Paste the complete block, including the lines <code>apiKey</code>, <code>projectId</code> and <code>appId</code>.</li>
+        <li><b>Nothing appears in Firestore.</b> Make sure you finished a real quiz (not the sample) and that the tick box was on, or press <b>Send results to my Firebase</b> on the final screen.</li>
+      </ul>
+      <div class="row"><button class="ghost" id="guideBack2" type="button" data-i18n="back2builder"></button></div>
+    </div>
+  </section>
+
+  <!-- ================= ADMIN ================= -->
+  <section class="screen" id="admin">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="adminTitle"></h1>
+        <div class="row"><button class="ghost" id="adminRefresh" type="button" data-i18n="admRefresh"></button><button class="ghost" id="adminBack" type="button" data-i18n="home"></button></div></div>
+      <p class="note" data-i18n="admIntro"></p>
+      <div class="stats" id="adminStats"></div>
+      <div class="row"><button class="primary" id="admUsageCsv" type="button" data-i18n="admUsageCsv"></button><button class="ghost" id="admUsersCsv" type="button" data-i18n="admUsersCsv"></button></div>
+      <div class="note" id="adminMsg" aria-live="polite"></div>
+      <div class="panel2"><h2 data-i18n="admRecent"></h2><div class="tablewrap"><table class="bt" id="admUsage"></table></div></div>
+      <div class="panel2"><h2 data-i18n="admUsers"></h2><div class="tablewrap"><table class="bt" id="admUsersT"></table></div></div>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section class="screen" id="game">
+    <div class="top">
+      <div class="segs" id="segs"></div>
+      <button class="icon icon-btn" id="fs" type="button" data-i18n-aria="fs"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button class="icon" id="gameHome" type="button" data-i18n="home"></button>
+      <button class="icon" id="sound" type="button" aria-pressed="true"></button>
+    </div>
+    <div class="cols">
+      <div class="colL">
+      <div class="fit stage" id="fitL">
+      <div class="meta">
+        <div class="chips">
+          <span class="chip" id="type"></span>
+          <span class="chip lvl" id="level" hidden></span>
+          <span class="chip worth" id="worth"></span>
+        </div>
+        <div class="timer">
+          <div class="tbar"><i id="tfill"></i></div>
+          <div class="time" id="time">0:30</div>
+          <button class="ghost icon-btn" id="tgo" type="button"></button>
+          <button class="ghost icon-btn" id="treset" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span data-i18n="tReset"></span></button>
+        </div>
+      </div>
+      <div class="timeup" id="timeup" data-i18n="timeUp"></div>
+      <h2 class="prompt" id="prompt"></h2>
+      <p class="sub" id="intro"></p>
+      <div class="opts" id="opts" style="display:none"></div>
+      <div class="hint" id="hint"></div>
+      <ul class="clues" id="clues"></ul>
+      <div class="answer" id="answer"></div>
+      <div class="actions">
+        <button class="ghost" id="readBtn" type="button" hidden></button>
+        <button class="ghost" id="clueBtn" type="button" data-i18n="nextClue"></button>
+        <button class="ghost" id="hintBtn" type="button"></button>
+        <button class="primary" id="revealBtn" type="button" data-i18n="showAns"></button>
+      </div>
+      </div>
+      </div>
+      <div class="colR">
+      <div class="fit" id="fitR">
+      <div class="panel" id="entry">
+        <div class="stephint s1" id="stepHint"></div>
+        <div class="entry-head"><h3 id="entryTitle" data-i18n="givenBy"></h3></div>
+        <div class="parts-row" id="ptsRow" style="display:none"><span class="parts-label" data-i18n="ptsLbl"></span><span class="pchips" id="ptsChips"></span><span class="pts-cap" id="ptsCap"></span></div>
+        <div class="pts-help" id="ptsHelp"></div>
+        <div class="picks-wrap" id="picksWrap" style="display:none">
+          <div class="picks-title" data-i18n="earlier"></div>
+          <div class="picks" id="picks"></div>
+        </div>
+        <div class="entry-row">
+          <input type="text" id="nameIn" list="names" autocomplete="off" maxlength="600" data-i18n-ph="namePh" data-i18n-aria="namePh">
+          <datalist id="names"></datalist>
+          <button class="primary" id="addBtn" type="button" data-i18n="givePts"></button>
+        </div>
+        <div class="entry-msg" id="entryMsg" aria-live="polite"></div>
+        <div class="got" id="got" aria-live="polite"></div>
+      </div>
+      <div class="nav">
+        <button class="ghost icon-btn" id="prev" type="button" data-i18n-aria="prevQ"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+        <button class="ghost icon-btn" id="nextBtn" type="button"><span id="nextLabel"></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+      <div class="panel lb" id="liveLb"></div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FINAL ================= -->
+  <section class="screen end" id="end">
+    <h2 id="winner"></h2>
+    <div class="lbwrap">
+      <div class="lbtitle" id="lbTitle"></div>
+      <ol class="rank" id="rank"></ol>
+    </div>
+    <div class="take verse-card">
+      <p class="verse" id="verseText"></p>
+      <div class="verse-ref" id="verseRef"></div>
+    </div>
+    <div class="row">
+      <button class="primary" id="again" type="button" data-i18n="newQuiz"></button>
+      <button class="ghost" id="saveRedo" type="button" hidden data-i18n="saveRedo"></button>
+      <button class="ghost" id="endHome" type="button" data-i18n="home"></button>
+      <button class="ghost" id="exitFs2" type="button" hidden data-i18n="exitFs"></button>
+      <button class="ghost icon-btn" id="csvBtn" type="button" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-i18n="csvBtn"></span></button>
+      <button class="ghost" id="saveCloud" type="button" hidden data-i18n="saveCloud"></button>
+      <button class="ghost icon-btn" id="exportBtn" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span data-i18n="savePdf"></span></button>
+    </div>
+    <div class="export-msg" id="exportMsg" aria-live="polite"></div>
+  </section>
+</div>
+<div class="confetti" id="confetti" aria-hidden="true"></div>

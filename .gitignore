@@ -1,0 +1,26 @@
+# PRIVATE: your Firebase config and your full question bank. Never commit these.
+private/
+.env
+*.key
+*.pem
+firebase-debug.log
+.firebase/
+.firebaserc
+
+# Built output (made by the build or the GitHub Action)
+dist/
+docs/
+
+# Bible texts: each version has its own licence
+bibles/
+*.usfm
+*.sfm
+*.usx
+*.usfx
+*_usfm.zip
+obq-bible-text-bundle.zip
+
+# Other
+node_modules/
+__pycache__/
+.DS_Store

@@ -1,0 +1,300 @@
+(function () {
+  "use strict";
+  /* =====================================================================
+     4. ENGINE  -  you normally never edit below this line.
+     ===================================================================== */
+  var S = QUIZ_SETTINGS, LANGS = QUIZ_LANGUAGES, I18N = QUIZ_I18N;
+  var BOOKS_OT = QUIZ_BOOKS_OT, BOOKS_NT = QUIZ_BOOKS_NT, ALL_BOOKS = BOOKS_OT.concat(BOOKS_NT);
+  var TEMPLATE_B64 = "/*TEMPLATE_B64*/";     // filled in by the build step: the Excel question-bank template
+  var XLSX_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+
+  /* ---------- small helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function z2(n) { return (n < 10 ? "0" : "") + n; }
+  function shuffle(a) { var b = a.slice(), i, j, t; for (i = b.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
+  function normName(s) { return String(s == null ? "" : s).replace(/\s+/g, " ").trim(); }
+  function keyOf(n) { return n.toLowerCase(); }
+  function langInfo(code) { for (var i = 0; i < LANGS.length; i++) if (LANGS[i].code === code) return LANGS[i]; return LANGS[0]; }
+  function langByName(v) {
+    v = normName(v).toLowerCase(); if (!v) return "";
+    for (var i = 0; i < LANGS.length; i++) { var L = LANGS[i]; if (v === L.code || v === L.english.toLowerCase() || v === L.native.toLowerCase() || (v === "oriya" && L.code === "or") || (v === "odiya" && L.code === "or")) return L.code; }
+    return null;
+  }
+  function todayISO() { var d = new Date(); return d.getFullYear() + "-" + z2(d.getMonth() + 1) + "-" + z2(d.getDate()); }
+  function validEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s); }
+
+  /* ---------- storage (falls back to memory when the browser blocks it) ---------- */
+  var mem = {};
+  function lsGet(k, d) { try { var v = window.localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return (k in mem) ? mem[k] : d; } }
+  function lsSet(k, v) { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) { mem[k] = v; } }
+  function lsDel(k) { try { window.localStorage.removeItem(k); } catch (e) {} delete mem[k]; }
+
+  /* ---------- state ---------- */
+  var ui = "en", quizLang = "en";
+  var user = null;                 // { email, name, org, country, usage, consent, uid }
+  var bank = [];                   // the Quiz Master's uploaded questions
+  var cfg = null;                  // details of the quiz being run (from the setup page)
+  var ROUNDS = [];                 // the questions of the quiz being run
+  var fb = { on: false, auth: null, db: null, analytics: null };
+
+  /* ---------- interface text ---------- */
+  function T(key, vars, lang) {
+    var d = I18N[lang || ui], s = (d && d[key] != null) ? d[key] : (I18N.en[key] != null ? I18N.en[key] : key);
+    if (vars) s = s.replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
+    return s;
+  }
+  function TQ(key, vars) { return T(key, vars, quizLang); }
+  function applyI18n() {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n]"), function (n) { n.textContent = T(n.getAttribute("data-i18n")); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-ph]"), function (n) { n.placeholder = T(n.getAttribute("data-i18n-ph")); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-aria]"), function (n) { var t = T(n.getAttribute("data-i18n-aria")); n.setAttribute("aria-label", t); n.title = t; });
+    document.title = (cfg && cfg.event ? cfg.event + " - " : "") + S.appName;
+  }
+  function setUi(code, skipPaint) {
+    if (!I18N[code]) code = "en";
+    ui = code; lsSet("qms.ui", code);
+    var li = langInfo(code), root = document.documentElement;
+    root.lang = code; root.dir = li.dir; root.style.setProperty("--font", li.font);
+    applyI18n();
+    if (!skipPaint) repaintStatic();
+  }
+  function fmtDate(iso) {
+    try {
+      var p = String(iso || todayISO()).split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]);
+      return new Intl.DateTimeFormat(langInfo(ui).locale, S.dateOptions).format(d);
+    } catch (e) { return iso; }
+  }
+
+  /* ---------- colours and brand ---------- */
+  function applyColors() {
+    var c = S.colors, st = document.documentElement.style;
+    var map = { bg: "--bg", panel: "--panel", panelHi: "--panel-hi", ink: "--ink", muted: "--muted", accent: "--sun", accentInk: "--sun-ink", chip: "--pink", good: "--good", goodInk: "--good-ink", bad: "--bad" };
+    Object.keys(map).forEach(function (k) { if (c[k]) st.setProperty(map[k], c[k]); });
+    var m = /^#?([0-9a-f]{6})$/i.exec(c.ink || ""); if (m) { var n = parseInt(m[1], 16); st.setProperty("--line", "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + ",.16)"); }
+    var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute("content", c.bg);
+  }
+  function paintBrand() {
+    $("bname").textContent = S.appName; $("btag").textContent = S.tagline || ""; $("btag").style.display = S.tagline ? "" : "none";
+    var lg = $("logo"), al = $("authLogo"), has = !!(S.logo && S.logo !== "@logo");
+    lg.hidden = !has; al.hidden = !has;
+    if (has) { lg.src = S.logo; lg.alt = S.appName; al.src = S.logo; al.alt = S.appName; }
+    $("bname").classList.toggle("sr", has);                                   // the logo already shows the name: keep the text for screen readers only
+    $("btag").style.display = (S.tagline && !has) ? "" : "none";
+  }
+
+  /* ---------- screens ---------- */
+  var SCREENS = ["auth", "home", "lite", "setup", "dashboard", "admin", "ownguide", "qmguide", "game", "end"];
+  function show(id) {
+    SCREENS.forEach(function (s) { $(s).classList.toggle("active", s === id); });
+    document.body.setAttribute("data-screen", id);
+    $("tbRight").hidden = !(user && (id === "home" || id === "lite" || id === "setup" || id === "dashboard" || id === "admin" || id === "ownguide" || id === "qmguide"));
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- usage statistics kept on this device ---------- */
+  function stats() { return lsGet("qms.stats", { quizzes: 0, questions: 0, pdfs: 0 }); }
+  function bump(k, n) { var s = stats(); s[k] = (s[k] || 0) + (n || 1); lsSet("qms.stats", s); }
+  function track(name, params) {
+    if (fb.analytics && !(user && user.consent === false)) { try { fb.analytics.logEvent(name, params || {}); } catch (e) {} }
+  }
+
+  /* ---------- Firebase (only when settings.firebase.apiKey is filled in) ---------- */
+  function fbConfigured() { return !!(S.firebase && S.firebase.apiKey && S.firebase.projectId); }
+  function loadScript(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement("script"); s.src = src; s.async = true;
+      s.onload = res; s.onerror = function () { rej(new Error("Could not load " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  function initFirebase() {
+    if (!fbConfigured()) return Promise.resolve(false);
+    var base = "https://www.gstatic.com/firebasejs/" + S.firebaseSdkVersion + "/";
+    var timeout = new Promise(function (_, rej) { setTimeout(function () { rej(new Error("timeout")); }, 9000); });
+    var load = loadScript(base + "firebase-app-compat.js").then(function () {
+      return Promise.all([loadScript(base + "firebase-auth-compat.js"), loadScript(base + "firebase-firestore-compat.js")]);
+    }).then(function () {
+      window.firebase.initializeApp(S.firebase);
+      fb.auth = window.firebase.auth(); fb.db = window.firebase.firestore(); fb.on = true;
+      if (S.firebase.measurementId) {
+        window["ga-disable-" + S.firebase.measurementId] = true;     // nothing is collected until a signed-in user has agreed (see onLogin)
+        return loadScript(base + "firebase-analytics-compat.js").then(function () {
+          fb.analytics = window.firebase.analytics();
+          try { fb.analytics.setAnalyticsCollectionEnabled(false); } catch (e) {}
+        }).catch(function () {});
+      }
+    }).then(function () { return true; });
+    return Promise.race([load, timeout]).catch(function () { fb.on = false; return false; });
+  }
+  function fbErr(e) {
+    var c = (e && e.code) || "";
+    if (c === "auth/email-already-in-use") return "errExists";
+    if (c === "auth/weak-password") return "errPass";
+    if (c === "auth/invalid-email") return "errEmail";
+    if (c === "auth/network-request-failed") return "errNet";
+    if (/auth\/(wrong-password|user-not-found|invalid-credential|invalid-login-credentials)/.test(c)) return "errCreds";
+    return "errNet";
+  }
+
+  /* ---------- local accounts (used when Firebase is not configured) ---------- */
+  function b64(buf) { var s = "", u = new Uint8Array(buf); for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
+  function randSalt() { var a = new Uint8Array(16); (window.crypto || window.msCrypto).getRandomValues(a); return b64(a); }
+  function hashPw(pw, salt) {
+    try {
+      if (window.crypto && crypto.subtle) {
+        var saltBytes = Uint8Array.from(atob(salt), function (c) { return c.charCodeAt(0); });
+        return crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"])
+          .then(function (k) { return crypto.subtle.deriveBits({ name: "PBKDF2", salt: saltBytes, iterations: 100000, hash: "SHA-256" }, k, 256); })
+          .then(b64);
+      }
+    } catch (e) {}
+    var h = 5381, s = salt + pw; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return Promise.resolve("x" + h);
+  }
+  function localUsers() { return lsGet("qms.users", {}); }
+  function localSignUp(p, pw) {
+    var users = localUsers(), key = p.email.toLowerCase();
+    if (users[key]) return Promise.reject({ key: "errExists" });
+    var salt = randSalt();
+    return hashPw(pw, salt).then(function (h) {
+      users[key] = { profile: p, salt: salt, hash: h }; lsSet("qms.users", users); lsSet("qms.session", key); return p;
+    });
+  }
+  function localSignIn(email, pw) {
+    var u = localUsers()[email.toLowerCase()];
+    if (!u) return Promise.reject({ key: "errCreds" });
+    return hashPw(pw, u.salt).then(function (h) {
+      if (h !== u.hash) return Promise.reject({ key: "errCreds" });
+      lsSet("qms.session", email.toLowerCase()); return u.profile;
+    });
+  }
+
+  /* ---------- sign up / sign in / sign out ---------- */
+  /* Email confirmation: Firebase sends the link; the account is used only after the address is confirmed. Needs Firebase (local test mode cannot send email). */
+  function needsVerify(u) { return !!(S.requireEmailVerification && fb.on && u && u.emailVerified === false); }
+  function doSignUp(p, pw) {
+    if (!fb.on) return localSignUp(p, pw);
+    return fb.auth.createUserWithEmailAndPassword(p.email, pw).then(function (cred) {
+      p.uid = cred.user.uid;
+      var save = fb.db.collection("quizMasters").doc(p.uid).set({
+        name: p.name, email: p.email, org: p.org, country: p.country, usage: p.usage, consent: p.consent,
+        createdAt: window.firebase.firestore.FieldValue.serverTimestamp(), loginCount: 0
+      }).catch(function () {});
+      var mail = needsVerify(cred.user) ? cred.user.sendEmailVerification().catch(function () {}) : Promise.resolve();
+      return Promise.all([save, mail]).then(function () { if (needsVerify(cred.user)) p.pendingVerify = true; return p; });
+    }, function (e) { return Promise.reject({ key: fbErr(e) }); });
+  }
+  function doSignIn(email, pw) {
+    if (!fb.on) return localSignIn(email, pw);
+    return fb.auth.signInWithEmailAndPassword(email, pw).then(function (cred) {
+      return needsVerify(cred.user) ? { pendingVerify: true, email: cred.user.email || email } : fbProfile(cred.user);
+    }, function (e) { return Promise.reject({ key: fbErr(e) }); });
+  }
+  function showVerify(email) {
+    $("authTabs").hidden = true; $("formIn").hidden = true; $("formUp").hidden = true; $("verifyBox").hidden = false;
+    $("verifyMsg").textContent = T("verifyMsg", { email: email || "" }); $("verifyStatus").textContent = ""; $("authErr").textContent = ""; authBusy(false); show("auth");
+  }
+  function hideVerify() { $("verifyBox").hidden = true; $("authTabs").hidden = false; }
+  function verifyCheck() {
+    var u = fb.on && fb.auth && fb.auth.currentUser, st = $("verifyStatus");
+    if (!u) { st.className = "err"; st.textContent = T("verifyFail"); return; }
+    st.className = "note"; st.textContent = "...";
+    u.reload().then(function () { return u.getIdToken(true); }).then(function () {          // refresh the sign-in token so the database rules see the confirmed address
+      if (!u.emailVerified) { st.className = "err"; st.textContent = T("verifyNot"); return; }
+      return fbProfile(u).then(function (p) { hideVerify(); onLogin(p, false); });
+    }).catch(function () { st.className = "err"; st.textContent = T("verifyFail"); });
+  }
+  function verifyResend() {
+    var u = fb.on && fb.auth && fb.auth.currentUser, st = $("verifyStatus");
+    if (!u) { st.className = "err"; st.textContent = T("verifyFail"); return; }
+    u.sendEmailVerification().then(function () { st.className = "okmsg"; st.textContent = T("verifySent"); },
+      function (e) { st.className = "err"; st.textContent = (e && e.code === "auth/too-many-requests") ? T("verifyWait") : T("errNet"); });
+  }
+  function fbProfile(u) {
+    var base = { email: u.email || "", name: u.displayName || (u.email || "").split("@")[0], org: "", country: "", usage: "", consent: true, uid: u.uid };
+    return fb.db.collection("quizMasters").doc(u.uid).get().then(function (d) {
+      if (d && d.exists) { var x = d.data(); base.name = x.name || base.name; base.org = x.org || ""; base.country = x.country || ""; base.usage = x.usage || ""; base.consent = x.consent !== false; }
+      return base;
+    }).catch(function () { return base; });
+  }
+  function skipProfile() { return { email: "test@skip.local", name: "Test user", org: "Test", country: "", usage: "", consent: false, skipped: true }; }
+  /* Saves the login in Firestore: profile (login count, last login) and one record per login in quizMasters/{uid}/logins.
+     Passwords are never stored here: Firebase Authentication keeps them (hashed) on its own. */
+  var USER_FIELDS = ["name", "email", "org", "country", "usage", "consent", "createdAt", "lastLoginAt", "loginCount"];
+  function fbRecordLogin(p) {
+    if (!(fb.on && p.uid)) return Promise.resolve();
+    var F = window.firebase.firestore.FieldValue, ref = fb.db.collection("quizMasters").doc(p.uid);
+    return ref.get().then(function (d) {
+      if (d.exists) return ref.update({ lastLoginAt: F.serverTimestamp(), loginCount: F.increment(1) });
+      return ref.set({ name: p.name || "", email: p.email, org: p.org || "", country: p.country || "", usage: p.usage || "", consent: p.consent !== false, createdAt: F.serverTimestamp(), lastLoginAt: F.serverTimestamp(), loginCount: 1 });
+    }).then(function () {
+      return ref.collection("logins").add({ at: F.serverTimestamp(), method: "password", uiLang: ui, agent: String(navigator.userAgent || "").slice(0, 200) });
+    }).catch(function () {});
+  }
+  function onLogin(p, isNew) {
+    user = p; loadBank(); loadKb(); loadSetups(); fbRecordLogin(p); checkAdmin(); paintOwn();
+    if (S.firebase.measurementId) window["ga-disable-" + S.firebase.measurementId] = (p.consent === false);
+    if (fb.analytics) { try { fb.analytics.setAnalyticsCollectionEnabled(p.consent !== false); if (p.uid) fb.analytics.setUserId(p.uid); } catch (e) {} }
+    track(isNew ? "sign_up" : "login", { method: fb.on ? "firebase" : "local" });
+    $("uchip").textContent = (p.name || p.email) + (p.org ? " - " + p.org : "");
+    $("authErr").textContent = ""; $("inPass").value = ""; $("upPass").value = "";
+    goHomePage();
+    fbLoadBank();
+  }
+  function signOut() {
+    var done = function () {
+      if (S.firebase.measurementId) window["ga-disable-" + S.firebase.measurementId] = true;
+      if (fb.analytics) { try { fb.analytics.setAnalyticsCollectionEnabled(false); } catch (e) {} }
+      user = null; bank = []; kbMeta = []; setups = []; isAdmin = false; $("goAdmin").hidden = true; ownApp = null; if ($("savedList")) renderSaved(); lsDel("qms.session"); $("uchip").textContent = ""; $("inEmail").value = ""; $("inPass").value = "";
+      ["upName", "upEmail", "upOrg", "upCountry", "upPass"].forEach(function (id) { $(id).value = ""; });
+      $("upUsage").value = ""; $("tbRight").hidden = true; hideVerify(); setAuthTab("in"); authBusy(false); show("auth");
+    };
+    if (fb.on && fb.auth) fb.auth.signOut().then(done, done); else done();
+  }
+  function setAuthTab(which) {
+    var up = which === "up";
+    $("formIn").hidden = up; $("formUp").hidden = !up;
+    $("tabIn").setAttribute("aria-selected", up ? "false" : "true"); $("tabUp").setAttribute("aria-selected", up ? "true" : "false");
+    $("authErr").textContent = "";
+  }
+  function authBusy(b) { ["btnIn", "btnUp"].forEach(function (id) { $(id).disabled = b; }); }
+  function authFail(e) { authBusy(false); $("authErr").textContent = T((e && e.key) || "errNet"); }
+  function wireAuth() {
+    $("tabIn").addEventListener("click", function () { setAuthTab("in"); });
+    $("tabUp").addEventListener("click", function () { setAuthTab("up"); });
+    $("authLang").addEventListener("change", function () { setUi($("authLang").value); });
+    $("btnIn").addEventListener("click", function (ev) {
+      ev.preventDefault();
+      var email = normName($("inEmail").value), pw = $("inPass").value;
+      if (!email || !pw) { $("authErr").textContent = T("errFill"); return; }
+      if (!validEmail(email)) { $("authErr").textContent = T("errEmail"); return; }
+      $("authErr").textContent = ""; authBusy(true);
+      doSignIn(email, pw).then(function (p) { authBusy(false); if (p && p.pendingVerify) showVerify(p.email); else onLogin(p, false); }, authFail);
+    });
+    $("btnUp").addEventListener("click", function (ev) {
+      ev.preventDefault();
+      var p = { name: normName($("upName").value), email: normName($("upEmail").value), org: normName($("upOrg").value), country: normName($("upCountry").value), usage: $("upUsage").value, consent: $("upConsent").checked };
+      var pw = $("upPass").value;
+      if (!p.name || !p.email || !p.org || !p.country || !p.usage || !pw) { $("authErr").textContent = T("errFill"); return; }
+      if (!validEmail(p.email)) { $("authErr").textContent = T("errEmail"); return; }
+      if (pw.length < 6) { $("authErr").textContent = T("errPass"); return; }
+      $("authErr").textContent = ""; authBusy(true);
+      doSignUp(p, pw).then(function (prof) { authBusy(false); if (prof && prof.pendingVerify) showVerify(prof.email); else onLogin(prof, true); }, authFail);
+    });
+    // no <form> elements: the claude.ai page sandbox blocks form submission, so Enter is handled here
+    [["formIn", "btnIn"], ["formUp", "btnUp"]].forEach(function (p) {
+      $(p[0]).addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT") { e.preventDefault(); $(p[1]).click(); } });
+    });
+    $("skipLogin").hidden = !S.skipLoginButton;
+    $("skipLogin").addEventListener("click", function () { lsSet("qms.session", "skip"); onLogin(skipProfile(), false); });
+    $("forgotBtn").addEventListener("click", function () {
+      var email = normName($("inEmail").value);
+      if (!validEmail(email)) { $("authErr").textContent = T("errEmail"); return; }
+      if (!fb.on) { $("authErr").textContent = T("localNote"); return; }
+      fb.auth.sendPasswordResetEmail(email).then(function () { $("authErr").textContent = ""; $("authNote").textContent = T("resetSent"); }, function (e) { $("authErr").textContent = T(fbErr(e)); });
+    });
+    $("signOutBtn").addEventListener("click", signOut);
+    $("verifyDone").addEventListener("click", verifyCheck); $("verifyResend").addEventListener("click", verifyResend); $("verifyOut").addEventListener("click", signOut);
+  }

@@ -1,0 +1,151 @@
+  <!-- ================= INSTRUCTIONS FOR QUIZ MASTERS ================= -->
+  <section class="screen" id="qmguide">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="qmGuideTitle"></h1>
+        <div class="row"><button class="ghost" id="qmBack" type="button" data-i18n="back2builder"></button><button class="ghost" id="qmHome" type="button" data-i18n="home"></button></div></div>
+      <p class="note">Everything you need to prepare, run and finish an Oral Bible Quiz. Tap a heading to jump to it.</p>
+      <div class="row toc">
+        <button class="ghost sm" type="button" data-goto="g-quick">Quick start</button>
+        <button class="ghost sm" type="button" data-goto="g-before">Before the event</button>
+        <button class="ghost sm" type="button" data-goto="g-setup">The setup page</button>
+        <button class="ghost sm" type="button" data-goto="g-run">Running the quiz</button>
+        <button class="ghost sm" type="button" data-goto="g-kinds">Kinds of question and points</button>
+        <button class="ghost sm" type="button" data-goto="g-keys">Remote and keys</button>
+        <button class="ghost sm" type="button" data-goto="g-after">After the quiz</button>
+        <button class="ghost sm" type="button" data-goto="g-questions">Your questions</button>
+        <button class="ghost sm" type="button" data-goto="g-tips">Tips for oral groups</button>
+        <button class="ghost sm" type="button" data-goto="g-help">If something goes wrong</button>
+      </div>
+
+      <h2 class="gh" id="g-quick">Quick start</h2>
+      <ol class="steps">
+        <li><b>Sign in</b>, or create an account the first time. After signing in you land on the <b>Home page</b> with the Verse of the Day and a button for every feature. After you create an account, open the confirmation email we send to your address, click the link, then come back and press <b>I have confirmed my email</b>. Look in the spam folder if you do not see it, and use <b>Send the email again</b> if needed.</li>
+        <li>Press <b>Set up a quiz</b> (or <b>OBQ Lite - Quick Quiz</b> for almost no setup) and fill in your name, the event name, the date, the number of participants and the languages. Choose <b>Individuals</b> or <b>Groups</b>, the <b>Quiz style</b> (Normal or Simple), the <b>scope</b> (1 book, 2 books or more than 2), the <b>number of questions</b> and where the questions come from.</li>
+        <li>Press <b>Start quiz</b>. The app goes into full screen.</li>
+        <li>For each question: <b>say the question</b>, wait for answers, press <b>Show correct answer</b>, <b>type the names</b> of those who answered correctly, press <b>Give points</b>, then <b>Next question</b>.</li>
+        <li>At the end save the results as <b>PDF</b> or <b>CSV</b>.</li>
+      </ol>
+      <p class="note">New to this? Press <b>Try the 5-question sample quiz</b> on the setup page and run through it once alone, or choose the <b>Simple</b> quiz style for your first real event.</p>
+
+      <h2 class="gh">The Home page and OBQ Lite</h2>
+      <p>The <b>Home page</b> opens after sign-in and whenever you press <b>Home</b>. It has an introduction on the left, a button for each feature on the right, and the Verse of the Day across the bottom (in your interface language if you have loaded a Bible text in it, otherwise the King James Version). The buttons: Set up a quiz, OBQ Lite, Demo Contest, My saved quizzes, Quiz Builder, Question Bank, Bible Text Knowledge Base, Quiz Results, Activity Dashboard, My Firebase Backup and these instructions.</p>
+      <p><b>OBQ Lite - Quick Quiz</b> is the fastest way to run a quiz. Choose the quiz language, the part of the Bible (whole Bible, New Testament, Old Testament or one book), the number of questions and Individuals or Groups, then press <b>Start quiz</b>. It always uses the Simple style: regular and multiple-choice questions, 1 point each, with no clues, no 50:50 and no multi-part. The <b>Demo Contest</b> runs a ready-made 10-question quiz so you can see every kind of question.</p>
+
+      <h2 class="gh" id="g-before">Before the event (checklist)</h2>
+      <ul class="steps">
+        <li><b>Questions:</b> decide the source: the built-in English questions, your own Excel question bank, or questions made from Bible text in your language (see "Your questions" below). Preview a few so you know what to expect.</li>
+        <li><b>Save it:</b> on the setup page press <b>Save for later</b>. Save as a <b>Template</b> to reuse it for other events, or as a <b>Scheduled event</b> with the date. Tick <b>Freeze the questions now</b> if you want exactly the same questions on the day. Saving clears the setup form (your name is kept) and puts the quiz in <b>My saved quizzes</b> at the top of the setup page. There press <b>Start now</b> to run it, or <b>Open in setup</b> to change something first. A green line reminds you of events in the next 7 days (only while the app is open).</li>
+        <li><b>Test:</b> run the sample quiz once on the same device and screen you will use, with your presentation remote if you have one (Quiz Builder, "Test your presentation remote").</li>
+        <li><b>Device:</b> charge it, switch off notifications, turn the sound up (the app gives a short sound for the timer and answers), and install the app on the home screen if you can (browser menu, Install app). Installed, it also works without internet.</li>
+        <li><b>Do not reload the page during a quiz.</b> Scores are kept only while the quiz is open. Reloading ends it and the points are lost.</li>
+        <li><b>Projector or TV:</b> use landscape. The app fits each question on one screen.</li>
+      </ul>
+
+      <h2 class="gh" id="g-setup">The setup page</h2>
+      <table class="bt">
+        <tr><th>Field</th><th>What to enter or choose</th></tr>
+        <tr><td>Quiz Master name</td><td>Your name. It appears on the PDF and CSV.</td></tr>
+        <tr><td>Event / quiz name</td><td>The event or the organisation where it is held. It is the title of the results.</td></tr>
+        <tr><td>Date of event</td><td>Today by default. Change it with the date picker.</td></tr>
+        <tr><td>No. of participants</td><td>How many people or groups take part (a number).</td></tr>
+        <tr><td>Interface language</td><td>The language of the app's buttons. Changing it does not change the questions.</td></tr>
+        <tr><td>Quiz language</td><td>The language of the questions. Choose <b>Other language</b> and type its name if it is not in the list.</td></tr>
+        <tr><td>Quiz mode</td><td><b>Individuals</b> (default): each person competes alone and you enter their names. <b>Groups</b>: teams compete and you enter team names.</td></tr>
+        <tr><td>Quiz style</td><td><b>Normal</b> (default): the full mix of various kinds of question (see below). <b>Simple</b>: only regular and multiple-choice questions, 1 point each, with no 50:50, no clues and no multi-part questions. Best for first-time Quiz Masters and children's groups.</td></tr>
+        <tr><td>Scope of the quiz</td><td>How many books (1 book, 2 books, more than 2 books, all New Testament, all Old Testament, full Bible, or any topic). For 1 or 2 books you tick exactly that many and the app will not let you tick more; for "more than 2" tick at least 3.</td></tr>
+        <tr><td>No. of questions</td><td>10, 20 or 30.</td></tr>
+        <tr><td>Question source</td><td><b>Random questions from the selected books</b> (built-in, English), <b>my question bank</b> (your Excel file), or <b>generated from my Bible text</b>. A line below tells you how many questions are available. If there are fewer than you asked for, press Start again to continue with fewer.</td></tr>
+      </table>
+      <p class="note"><b>Normal style mix for 10 questions:</b> 1 regular, 2 multiple choice, 1 trivia, 2 multiple choice with 50:50, 1 short answer with hints, 1 "Who am I?", 1 multi-part, 1 difficult. For 20 or 30 questions the mix repeats. <b>Simple style:</b> alternating regular and multiple-choice questions.</p>
+
+      <h2 class="gh" id="g-run">Running the quiz</h2>
+      <p>The app goes into <b>full screen</b> when the quiz starts (the browser asks for a tap or click first, so this happens when you press Start). To leave full screen press <b>Esc</b> or click the button in the top bar that says "Full screen: press Esc or click here to exit". Press it again to return. On an iPhone full screen is not available; use the installed app instead.</p>
+      <p><b>The screen.</b> The coloured bar at the top shows the questions (green = done, orange = now). On the left: the question number, the points, the timer and the question. On the right: the <b>step guide</b>, the names box, the Next button and the points table.</p>
+      <p><b>The same four steps for every question.</b> A bar above the names box always tells you which step you are on.</p>
+      <ol class="steps">
+        <li><b>Say the question</b> aloud and let people answer. Press <b>START</b> if you want the timer (30 seconds, or 45 for multi-part). When time is up the question hides, so everyone looks at you.</li>
+        <li>Press <b>Show correct answer</b>. The answer appears in green with the Bible reference and a short note to read aloud.</li>
+        <li><b>Type the names</b> of those who answered correctly and press <b>Give points</b> (or press Enter). Separate several names with commas, or tick names from "Earlier correct answers". Each name can score once per question. If a point is given by mistake, press the <b>x</b> next to the name to remove it.</li>
+        <li>Press <b>Next question</b>. It stays dim until the answer is shown and points are given. <b>Nobody answered correctly?</b> Press <b>Give points</b> with the names box empty; it records that nobody answered and unlocks Next.</li>
+      </ol>
+      <p><b>Read aloud.</b> The <b>Read aloud</b> button (or the R key) reads the current question, its options and any clues out loud with the voice of your device, and reads the answer once it is shown. Tick <b>Read each question aloud automatically</b> on the setup page or OBQ Lite and every new question, clue, hint and 50:50 is read for you. It needs a voice for the quiz language: phones and computers include voices for many Indian languages, but not all; if none is found, OBQ tells you, and you can add a voice in the device's text-to-speech settings. Turn the volume up and use a speaker for a group.</p>
+      <p class="note">The grey buttons are not broken: hover over them (or tap them) and a tip explains what is missing. The arrow button goes back to the previous question; if points were not given yet it asks you to press it twice. The <b>Home</b> button leaves the quiz and also asks you to press twice.</p>
+
+      <h2 class="gh" id="g-kinds">Kinds of question and how to give points</h2>
+      <table class="bt">
+        <tr><th>Kind</th><th>What you do</th><th>Points</th></tr>
+        <tr><td>Regular (one answer)</td><td>Ask, then show the answer.</td><td>1</td></tr>
+        <tr><td>Multiple choice</td><td>Read the four options (A, B, C, D) aloud. People choose one. Show the answer: the right option turns green.</td><td>1</td></tr>
+        <tr><td>Multiple choice with 50:50</td><td>If people are stuck, press <b>50:50</b> (or H). Two wrong options disappear and two remain: read them again.</td><td>1</td></tr>
+        <tr><td>Short answer with hints</td><td>Press <b>Show clue</b> to show the first hint, then <b>Next hint</b> for more. Only give hints if nobody has the answer.</td><td>1</td></tr>
+        <tr><td>Who am I? (clues)</td><td>Press <b>Next clue</b> (or Next on your remote) to reveal one clue at a time and read it aloud. People may answer after any clue. A person or group that already answered an earlier clue cannot answer a later one, so everyone gets a fair chance.</td><td>5 points if answered after clue 1, 4 after clue 2, 3 after clue 3, 2 after clue 4, 1 after clue 5. <b>Tap the points number</b> for the clue they answered on, then give points.</td></tr>
+        <tr><td>Multi-part</td><td>All parts show together (2 to 3). Read them aloud. Show the answers when ready.</td><td>1 point for each part answered correctly. <b>Tap the number</b> of parts they got right (for example 2 = both) then give points.</td></tr>
+        <tr><td>Trivia</td><td>A fun fact. Marked "Trivia" on screen.</td><td>1</td></tr>
+        <tr><td>Difficult</td><td>A harder question. Marked "Difficult" on screen. Give people a little longer.</td><td>1</td></tr>
+      </table>
+      <p class="note">Simple quiz style uses only the first two rows and always gives 1 point.</p>
+
+      <h2 class="gh" id="g-keys">Presentation remote and keyboard</h2>
+      <p>A presentation remote works like a keyboard. Use the <b>Test your presentation remote</b> box in the Quiz Builder to see what each button sends.</p>
+      <table class="bt">
+        <tr><th>Action</th><th>Keyboard</th><th>Remote button</th></tr>
+        <tr><td>Next step (clue, show answer, give points, next question)</td><td>Space, Enter, right arrow</td><td>Next slide (PageDown)</td></tr>
+        <tr><td>Back to the previous question</td><td>Left arrow</td><td>Previous slide (PageUp)</td></tr>
+        <tr><td>Start or pause the timer</td><td>T, . (full stop) or B</td><td>Black screen button</td></tr>
+        <tr><td>Hint or 50:50</td><td>H</td><td>-</td></tr>
+        <tr><td>Read the question aloud (or stop)</td><td>R</td><td>-</td></tr>
+        <tr><td>Click into the names box</td><td>N</td><td>-</td></tr>
+        <tr><td>Full screen on or off</td><td>F or F5</td><td>Start slideshow (F5)</td></tr>
+      </table>
+      <p class="note">With a remote, Next does the whole question: press it to show the answer, type the names on the keyboard (PageDown inside the names box gives the points), and press Next again to move on. If nobody answered, press Next twice at the points step.</p>
+
+      <h2 class="gh" id="g-after">After the quiz</h2>
+      <ul class="steps">
+        <li>The final screen shows the winner(s) and the full points table, with confetti if someone scored.</li>
+        <li><b>Save results as PDF</b>: an A4 report with your name, email, organisation, event, date, participants, quiz language, scope, quiz style, number of questions and the points table.</li>
+        <li><b>Download results (CSV)</b>: the same results for a spreadsheet, one row per participant. A name that starts with = + - or @ gets an apostrophe in front so it cannot run as a formula.</li>
+        <li>Every finished quiz is also kept in <b>Quiz Builder, My quiz results</b> on this device, where you can download or delete it.</li>
+        <li><b>Optional backup:</b> in the Quiz Builder you can connect your own Firebase and send results there (Quiz Builder, My Firebase, Step-by-step instructions). OBQ's own cloud never receives points or names; it only counts that a quiz was set up.</li>
+        <li><b>Save this quiz to redo later</b> stores the quiz you just played, with its exact questions, in <b>My saved quizzes</b>. Press <b>Start now</b> there to run the same quiz again with fresh scores.</li>
+        <li><b>New quiz</b> and <b>Home</b> return to the setup page. After a finished quiz the setup form starts empty (your name and the interface language are kept).</li>
+      </ul>
+
+      <h2 class="gh" id="g-questions">Your questions</h2>
+      <ul class="steps">
+        <li><b>Built-in:</b> about {{BANK_COUNT}} English questions across all 66 books, with every kind of question. Narrow scopes may run short, and the app tells you.</li>
+        <li><b>My question bank (Excel):</b> Quiz Builder, <b>Download Excel template</b>, fill in the Questions sheet (see the Examples sheet), save, then <b>Upload question bank</b>. Rows with a problem are skipped and listed with their row number. Tick "Add to my existing bank" to add instead of replacing. Categories: One answer, Multiple choice, Short answer with hints, Clue based, Multi-part. Optional columns: Level (Regular, Trivia, Difficult), Points, Seconds, Intro.</li>
+        <li><b>My Bible text:</b> Quiz Builder, <b>Bible text knowledge base</b>. Choose the language, then upload USFM, USFX, USX or text files (or a zip of them), import a ready-made bundle, or use <b>Bible Brain</b>: enter your API key, press <b>Load countries and languages</b>, choose a country and a language, and press <b>Download</b> next to a fileset in the list. The list shows the USX and plain-text filesets (the formats OBQ can read) and tells you how many other text filesets were found but not shown. You can also type a fileset ID yourself. Bible Brain downloads work from your own web address, not from the preview link. Press <b>Preview questions</b> to check samples, then choose the source <b>Questions generated from my Bible text</b> on the setup page. These questions are "complete the verse" and "which book is this verse from". Have a native speaker review them.</li>
+        <li><b>Quiz language and bank language:</b> the app uses only questions that match the quiz language chosen on the setup page (or have no language set).</li>
+        <li><b>Licences:</b> make sure you may use each Bible version you load.</li>
+      </ul>
+
+      <h2 class="gh" id="g-tips">Tips for oral groups</h2>
+      <ul class="steps">
+        <li><b>Read each question twice,</b> slowly. Read options as "A ... B ... C ... D".</li>
+        <li><b>Keep to a rhythm:</b> question, think time, answer, names, points. Say the points out loud so everyone hears the score.</li>
+        <li><b>Use the answer note.</b> After the answer, read the short "More to know" line: it teaches as well as scores.</li>
+        <li><b>Make helpers:</b> ask a helper to call out the group names so you can type quickly.</li>
+        <li><b>Start Simple</b> for children, new groups or noisy rooms. Move to Normal when everyone knows the routine.</li>
+        <li><b>Check the quiz language</b> and have a native speaker review generated or uploaded questions before the event.</li>
+      </ul>
+
+      <h2 class="gh" id="g-help">If something goes wrong</h2>
+      <ul class="steps">
+        <li><b>The Next question button is grey.</b> Show the correct answer and give points first (or give points with no name if nobody answered).</li>
+        <li><b>I gave points to the wrong person.</b> Press the <b>x</b> next to the name under "Correct answer given by". The points are removed.</li>
+        <li><b>I pressed Back by mistake.</b> The quiz keeps your points. Press the Next question button to continue.</li>
+        <li><b>Full screen does not start.</b> The browser only allows it after a click. Click the full screen button in the top bar. On an iPhone it is not available: install the app to the home screen. Press Esc to leave.</li>
+        <li><b>The timer has no sound.</b> Check the Sound button on the quiz screen and your device volume.</li>
+        <li><b>My remote does nothing.</b> Click once on the page first so it has focus, then test the buttons in the Quiz Builder box. Some remotes need their USB receiver plugged in.</li>
+        <li><b>Not enough questions.</b> Choose more books, a wider scope, another source, or upload a bigger question bank.</li>
+        <li><b>The page reloaded and the scores are gone.</b> A quiz cannot be recovered after a reload. Next time keep the page open; the final results are saved only when the quiz ends.</li>
+        <li><b>Excel upload shows skipped rows.</b> Read the row numbers and reasons on screen, correct those rows in Excel and upload again.</li>
+        <li><b>I forgot my password.</b> On the sign-in screen use "Forgot password?" (available when your organisation has turned on online sign-in).</li>
+      </ul>
+
+      <h2 class="gh">Privacy</h2>
+      <p class="note">Participant names and points stay on your device (and in your own Firebase only if you connect one). Do not share a device with your results history. Delete finished results you no longer need in the Quiz Builder. Tell participants that their names and scores are recorded.</p>
+      <div class="row"><button class="ghost" id="qmBack2" type="button" data-i18n="back2builder"></button></div>
+    </div>
+  </section>
+
