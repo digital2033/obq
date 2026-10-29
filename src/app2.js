@@ -356,8 +356,8 @@
       qc.appendChild(b);
     });
     $("keysHelp").textContent = T("keysHelp");
-    $("authNote").textContent = fb.on ? "" : T("localNote");
-    $("forgotBtn").hidden = !fb.on; $("btnLink").hidden = !fb.on;
+    $("authNote").textContent = fb.on ? T("onlineNote") : T("localNote");
+    paintNavTitles(); $("forgotBtn").hidden = !fb.on; $("btnLink").hidden = !fb.on; $("inRemember").checked = rememberPref(); $("upRemember").checked = rememberPref();
     var pu = $("pfUsage"), pv = pu.value; clear(pu); var po = el("option", null, T("usage")); po.value = ""; pu.appendChild(po);
     [["church", "use1"], ["school", "use2"], ["community", "use3"], ["work", "use4"]].forEach(function (x) { var o = el("option", null, T(x[1])); o.value = x[0]; pu.appendChild(o); }); pu.value = pv;
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-mode]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-mode") === sel.mode ? "true" : "false"); });
@@ -492,7 +492,7 @@
     $("srcBWrap").hidden = !S.builtInBank; if (!S.builtInBank) $("srcU").checked = true;
     $("trySample").hidden = !S.sampleQuizButton; $("readWrap").hidden = !speechOK; refreshVoicePickers();
     $("saveResWrap").hidden = !(user && ownConnected());              // only when the Quiz Master has connected their own Firebase
-    paintSelects(); paintBankInfo(); renderSaved(); show("setup"); refreshAvail();
+    paintSelects(); paintBankInfo(); renderSaved(); show("setup"); setUrl("setup"); refreshAvail();
   }
   function wireSetup() {
     buildBooks();
@@ -515,8 +515,8 @@
     });
     $("begin").addEventListener("click", onBegin);
     $("trySample").addEventListener("click", onSample);
-    $("goHome").addEventListener("click", goHomePage);
-    $("goDash").addEventListener("click", function () { paintDashboard(); show("dashboard"); });
+    $("goHome").addEventListener("click", goHomePage); wireNav();
+    $("goDash").addEventListener("click", function () { openBuilder(""); });
     $("dashBack").addEventListener("click", goHomePage);
     $("dlTpl").addEventListener("click", dlTemplate);
     $("upBtn").addEventListener("click", function () { $("fileIn").click(); });
@@ -550,11 +550,15 @@
         tb.appendChild(tr);
       });
     }
+    Array.prototype.forEach.call(document.querySelectorAll("#panelActivity .langlist"), function (n) { n.remove(); });
     var st = stats(), sb = $("stats"); clear(sb);
     var hist = history(), names = hist.reduce(function (n, r) { return n + (r.resultsCount || 0); }, 0);
-    [["aQuizzes", st.quizzes], ["aQs", st.questions], ["aPdf", st.pdfs], ["aFinished", hist.length], ["aPeople", names]].forEach(function (p) {
+    var kbBooks = kbMeta.reduce(function (n, m) { return n + Object.keys(m.books || {}).length; }, 0), langs = st.langs || [];
+    [["aQuizzes", st.quizzes], ["aFinished", hist.length], ["aParts", st.participants], ["aLangs", langs.length], ["aQs", st.questions], ["aPdf", st.pdfs], ["aPeople", names],
+     ["aBankMine", bank.length], ["aBankBuilt", starter().length], ["aKbTexts", kbMeta.length], ["aKbBooks", kbBooks]].forEach(function (p) {
       var d = el("div", "stat"); d.appendChild(el("b", null, String(p[1] || 0))); d.appendChild(document.createTextNode(T(p[0]))); sb.appendChild(d);
     });
+    if (langs.length) { var ln = el("p", "note", T("aLangList", { list: langs.join(", ") })); sb.parentNode.insertBefore(ln, sb.nextSibling); ln.className = "note langlist"; }
     $("fbStatus").textContent = fb.on ? T("fbOn") : T("fbOff");
     $("remoteOut").textContent = "-"; paintKb(); paintOwn();
   }

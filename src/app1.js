@@ -78,23 +78,33 @@
   function paintBrand() {
     $("bname").textContent = S.appName; $("btag").textContent = S.tagline || ""; $("btag").style.display = S.tagline ? "" : "none";
     var lg = $("logo"), al = $("authLogo"), has = !!(S.logo && S.logo !== "@logo");
-    lg.hidden = !has; al.hidden = !has;
+    lg.hidden = !has; al.hidden = !has; var wl = $("welcomeLogo"); wl.hidden = !has; if (has) { wl.src = S.logo; wl.alt = S.appName; }
     if (has) { lg.src = S.logo; lg.alt = S.appName; al.src = S.logo; al.alt = S.appName; }
     $("bname").classList.toggle("sr", has);                                   // the logo already shows the name: keep the text for screen readers only
     $("btag").style.display = (S.tagline && !has) ? "" : "none";
   }
 
   /* ---------- screens ---------- */
-  var SCREENS = ["auth", "home", "lite", "setup", "dashboard", "admin", "ownguide", "qmguide", "settings", "game", "end"];
+  var SCREENS = ["auth", "welcome", "home", "lite", "setup", "dashboard", "admin", "ownguide", "qmguide", "settings", "game", "end"];
   function show(id) {
     SCREENS.forEach(function (s) { $(s).classList.toggle("active", s === id); });
     document.body.setAttribute("data-screen", id);
-    $("tbRight").hidden = !(user && (id === "home" || id === "lite" || id === "settings" || id === "setup" || id === "dashboard" || id === "admin" || id === "ownguide" || id === "qmguide"));
+    $("tbRight").hidden = !(user && (S.edition !== "basic") && (id === "home" || id === "lite" || id === "settings" || id === "setup" || id === "dashboard" || id === "admin" || id === "ownguide" || id === "qmguide"));
     window.scrollTo(0, 0);
   }
 
   /* ---------- usage statistics kept on this device ---------- */
-  function stats() { return lsGet("qms.stats", { quizzes: 0, questions: 0, pdfs: 0 }); }
+  function stats() {
+    var s = lsGet("qms.stats", { quizzes: 0, questions: 0, pdfs: 0 });
+    if (s.participants === undefined) {                                     // quizzes run before these totals existed: count them from the saved results
+      var h = typeof history === "function" ? history() : [];
+      s.participants = h.reduce(function (n, r) { return n + (parseInt(r.participants, 10) || 0); }, 0);
+      s.langs = []; h.forEach(function (r) { if (r.quizLang && s.langs.indexOf(r.quizLang) < 0) s.langs.push(r.quizLang); });
+      lsSet("qms.stats", s);
+    }
+    return s;
+  }
+  function addLang(l) { var s = stats(); s.langs = s.langs || []; if (l && s.langs.indexOf(l) < 0) { s.langs.push(l); lsSet("qms.stats", s); } }
   function bump(k, n) { var s = stats(); s[k] = (s[k] || 0) + (n || 1); lsSet("qms.stats", s); }
   function track(name, params) {
     if (fb.analytics && !(user && user.consent === false)) { try { fb.analytics.logEvent(name, params || {}); } catch (e) {} }
@@ -102,21 +112,21 @@
 
   /* ---------- Firebase (only when settings.firebase.apiKey is filled in) ---------- */
   function fbConfigured() { return !!(S.firebase && S.firebase.apiKey && S.firebase.projectId); }
-  function loadScript(src) {
+  function loadScript(src, tries) {
     return new Promise(function (res, rej) {
       var s = document.createElement("script"); s.src = src; s.async = true;
-      s.onload = res; s.onerror = function () { rej(new Error("Could not load " + src)); };
+      s.onload = res; s.onerror = function () { s.remove(); if ((tries || 0) < 1) loadScript(src, (tries || 0) + 1).then(res, rej); else rej(new Error("Could not load " + src)); };   // one automatic retry
       document.head.appendChild(s);
     });
   }
   function initFirebase() {
     if (!fbConfigured()) return Promise.resolve(false);
     var base = "https://www.gstatic.com/firebasejs/" + S.firebaseSdkVersion + "/";
-    var timeout = new Promise(function (_, rej) { setTimeout(function () { rej(new Error("timeout")); }, 9000); });
+    var timeout = new Promise(function (_, rej) { setTimeout(function () { rej(new Error("timeout")); }, 25000); });
     var load = loadScript(base + "firebase-app-compat.js").then(function () {
       return Promise.all([loadScript(base + "firebase-auth-compat.js"), loadScript(base + "firebase-firestore-compat.js")]);
     }).then(function () {
-      window.firebase.initializeApp(S.firebase);
+      if (!window.firebase.apps || !window.firebase.apps.length) window.firebase.initializeApp(S.firebase);
       fb.auth = window.firebase.auth(); fb.db = window.firebase.firestore(); fb.on = true;
       if (S.firebase.measurementId) {
         window["ga-disable-" + S.firebase.measurementId] = true;     // nothing is collected until a signed-in user has agreed (see onLogin)
@@ -134,7 +144,9 @@
     if (c === "auth/weak-password") return "errPass";
     if (c === "auth/invalid-email") return "errEmail";
     if (c === "auth/network-request-failed") return "errNet";
-    if (/auth\/(wrong-password|user-not-found|invalid-credential|invalid-login-credentials)/.test(c)) return "errCreds";
+    if (c === "auth/wrong-password") return "errCreds";
+    if (c === "auth/user-not-found") return "errNoOnline";
+    if (/auth\/(invalid-credential|invalid-login-credentials)/.test(c)) return "errCredsOnline";
     return "errNet";
   }
 
@@ -154,50 +166,89 @@
     return Promise.resolve("x" + h);
   }
   function localUsers() { return lsGet("qms.users", {}); }
-  function localSignUp(p, pw) {
+  /* ---------- "Remember me on this device": stay signed in until sign-out, and sign in again without internet ---------- */
+  function rememberPref() { return lsGet("qms.remember", true) !== false; }
+  function setRememberPref(v) { lsSet("qms.remember", !!v); }
+  function sessGet() {                                            // the saved sign-in of this device (long-lived), or of this tab only
+    var k = ""; try { k = window.sessionStorage.getItem("qms.session") || ""; } catch (e) {}
+    if (!k) { var v = lsGet("qms.session", ""); k = typeof v === "string" ? v : ""; }
+    return k;
+  }
+  function sessSet(key, remember) {
+    if (remember) { lsSet("qms.session", key); try { window.sessionStorage.removeItem("qms.session"); } catch (e) {} }
+    else { try { window.sessionStorage.setItem("qms.session", key); } catch (e) { mem["qms.session"] = key; } lsDel("qms.session"); }
+  }
+  function sessDel() { lsDel("qms.session"); try { window.sessionStorage.removeItem("qms.session"); } catch (e) {} }
+  function pickProfile(p) { return { name: p.name || "", email: p.email || "", org: p.org || "", country: p.country || "", usage: p.usage || "", consent: p.consent !== false, terms: p.terms || "", uid: p.uid || "" }; }
+  /* Online accounts: keep a salted hash of the password and the profile on THIS device (only when "Remember me" is ticked), so the same email and
+     password also work without internet. Firebase keeps the real account; this is only an offline key for this device. */
+  function rememberDevice(p, pw, remember) {
+    setRememberPref(remember);
+    if (!p || !p.email) return Promise.resolve();
+    var key = p.email.toLowerCase(), users = localUsers();
+    if (!remember || !pw) { if (users[key] && users[key].online) { delete users[key]; lsSet("qms.users", users); } if (!remember) sessDel(); return Promise.resolve(); }
+    var salt = randSalt();
+    return hashPw(pw, salt).then(function (h) { var us = localUsers(); us[key] = { profile: pickProfile(p), salt: salt, hash: h, online: true }; lsSet("qms.users", us); sessSet(key, true); });
+  }
+  function cacheProfile(p) {                                      // keep the offline copy of the profile current
+    if (!p || !p.email) return;
+    var us = localUsers(), k = p.email.toLowerCase();
+    if (us[k] && us[k].online) { us[k].profile = pickProfile(p); lsSet("qms.users", us); }
+  }
+  function forgetDevice() {                                       // remove the offline sign-in and the saved session of this device
+    var email = user && user.email ? user.email.toLowerCase() : "", us = localUsers();
+    if (email && us[email] && us[email].online) { delete us[email]; lsSet("qms.users", us); }
+    setRememberPref(false); sessDel();
+  }
+  function setPersist(remember) {                                 // Firebase: LOCAL = stays signed in after the browser is closed, SESSION = until the tab is closed
+    try { var P = window.firebase.auth.Auth.Persistence; return fb.auth.setPersistence(remember ? P.LOCAL : P.SESSION).catch(function () {}); } catch (e) { return Promise.resolve(); }
+  }
+  function keepStorage() { try { if (navigator.storage && navigator.storage.persist) { var r = navigator.storage.persist(); if (r && r.catch) r.catch(function () {}); } } catch (e) {} }     // ask the browser not to clear this site's data on its own
+  function localSignUp(p, pw, remember) {
     var users = localUsers(), key = p.email.toLowerCase();
     if (users[key]) return Promise.reject({ key: "errExists" });
     var salt = randSalt();
     return hashPw(pw, salt).then(function (h) {
-      users[key] = { profile: p, salt: salt, hash: h }; lsSet("qms.users", users); lsSet("qms.session", key); return p;
+      users[key] = { profile: p, salt: salt, hash: h }; lsSet("qms.users", users); sessSet(key, remember !== false); setRememberPref(remember !== false); keepStorage(); return p;
     });
   }
-  function localSignIn(email, pw) {
+  function localSignIn(email, pw, remember) {
     var u = localUsers()[email.toLowerCase()];
-    if (!u) return Promise.reject({ key: "errCreds" });
+    if (!u) return Promise.reject({ key: "errNoLocal" });          // no such account in THIS browser and website address
     return hashPw(pw, u.salt).then(function (h) {
       if (h !== u.hash) return Promise.reject({ key: "errCreds" });
-      lsSet("qms.session", email.toLowerCase()); return u.profile;
+      sessSet(email.toLowerCase(), remember !== false); setRememberPref(remember !== false); return u.profile;
     });
   }
 
   /* ---------- sign up / sign in / sign out ---------- */
   /* Email confirmation: Firebase sends the link; the account is used only after the address is confirmed. Needs Firebase (local test mode cannot send email). */
   function needsVerify(u) { return !!(S.requireEmailVerification && fb.on && u && u.emailVerified === false); }
-  function doSignUp(p, pw) {
-    if (!fb.on) return localSignUp(p, pw);
-    return fb.auth.createUserWithEmailAndPassword(p.email, pw).then(function (cred) {
+  function doSignUp(p, pw, remember) {
+    if (!fb.on) return localSignUp(p, pw, remember);
+    return setPersist(remember).then(function () { return fb.auth.createUserWithEmailAndPassword(p.email, pw); }).then(function (cred) {
       p.uid = cred.user.uid;
       var save = fb.db.collection("quizMasters").doc(p.uid).set({
         name: p.name, email: p.email, org: p.org, country: p.country, usage: p.usage, consent: p.consent, terms: p.terms, termsAt: window.firebase.firestore.FieldValue.serverTimestamp(),
         createdAt: window.firebase.firestore.FieldValue.serverTimestamp(), loginCount: 0
       }).catch(function () {});
       var mail = needsVerify(cred.user) ? cred.user.sendEmailVerification().catch(function () {}) : Promise.resolve();
-      return Promise.all([save, mail]).then(function () { if (needsVerify(cred.user)) p.pendingVerify = true; return p; });
+      return Promise.all([save, mail, rememberDevice(p, pw, remember)]).then(function () { if (needsVerify(cred.user)) p.pendingVerify = true; return p; });
     }, function (e) { return Promise.reject({ key: fbErr(e) }); });
   }
-  function doSignIn(email, pw) {
-    if (!fb.on) return localSignIn(email, pw);
-    return fb.auth.signInWithEmailAndPassword(email, pw).then(function (cred) {
-      return needsVerify(cred.user) ? { pendingVerify: true, email: cred.user.email || email } : fbProfile(cred.user);
+  function doSignIn(email, pw, remember) {
+    if (!fb.on) return localSignIn(email, pw, remember);
+    return setPersist(remember).then(function () { return fb.auth.signInWithEmailAndPassword(email, pw); }).then(function (cred) {
+      if (needsVerify(cred.user)) return { pendingVerify: true, email: cred.user.email || email };
+      return fbProfile(cred.user).then(function (p) { return rememberDevice(p, pw, remember).then(function () { return p; }); });
     }, function (e) { return Promise.reject({ key: fbErr(e) }); });
   }
   function showVerify(email) {
     $("authTabs").hidden = true; $("formIn").hidden = true; $("formUp").hidden = true; $("verifyBox").hidden = false;
     $("verifyMsg").textContent = T("verifyMsg", { email: email || "" }); $("verifyStatus").textContent = ""; $("authErr").textContent = ""; authBusy(false); show("auth");
   }
-  function hideVerify() { ["verifyBox", "linkBox", "profileBox"].forEach(function (id) { $(id).hidden = true; }); $("authTabs").hidden = false; }
-  function showAuthBox(id) { $("authTabs").hidden = true; $("formIn").hidden = true; $("formUp").hidden = true; ["verifyBox", "linkBox", "profileBox"].forEach(function (x) { $(x).hidden = x !== id; }); $("authErr").textContent = ""; authBusy(false); show("auth"); }
+  function hideVerify() { ["verifyBox", "linkBox", "profileBox", "authOffline"].forEach(function (id) { $(id).hidden = true; }); $("authTabs").hidden = false; }
+  function showAuthBox(id) { $("authTabs").hidden = true; $("formIn").hidden = true; $("formUp").hidden = true; ["verifyBox", "linkBox", "profileBox", "authOffline"].forEach(function (x) { $(x).hidden = x !== id; }); $("authErr").textContent = ""; authBusy(false); show("auth"); }
 
   /* ---------- sign in with an email link (Firebase "Email link" provider): no password ---------- */
   function linkErr(e) {
@@ -212,7 +263,7 @@
     if (!fb.on) { err.textContent = T("localNote"); return; }
     if (!email) { err.textContent = T("errFill"); return; }
     if (!validEmail(email)) { err.textContent = T("errEmail"); return; }
-    err.textContent = ""; authBusy(true);
+    err.textContent = ""; authBusy(true); setRememberPref($("inRemember").checked);
     fb.auth.sendSignInLinkToEmail(email, { url: window.location.origin + window.location.pathname, handleCodeInApp: true }).then(function () {
       lsSet("qms.emailForSignIn", email); authBusy(false); note.className = "okmsg"; note.textContent = T("linkSent", { email: email });
     }, function (e) { authBusy(false); err.textContent = T(linkErr(e)); });
@@ -220,7 +271,7 @@
   function finishLink(emailGiven) {
     var email = emailGiven || lsGet("qms.emailForSignIn", "");
     if (!email) { showAuthBox("linkBox"); return; }                         // opened on another device: ask for the address
-    fb.auth.signInWithEmailLink(email, window.location.href).then(function (cred) {
+    setPersist(rememberPref()).then(function () { return fb.auth.signInWithEmailLink(email, window.location.href); }).then(function (cred) {
       lsDel("qms.emailForSignIn");
       try { window.history.replaceState(null, "", window.location.pathname); } catch (x) {}   // remove the one-time code from the address bar
       afterLinkSignIn(cred.user);
@@ -260,10 +311,14 @@
   }
   function fbProfile(u) {
     var base = { email: u.email || "", name: u.displayName || (u.email || "").split("@")[0], org: "", country: "", usage: "", consent: true, terms: "", uid: u.uid };
-    return fb.db.collection("quizMasters").doc(u.uid).get().then(function (d) {
-      if (d && d.exists) { var x = d.data(); base.name = x.name || base.name; base.org = x.org || ""; base.country = x.country || ""; base.usage = x.usage || ""; base.consent = x.consent !== false; base.terms = x.terms || ""; }
-      return base;
-    }).catch(function () { return base; });
+    var cached = (function () { var e = localUsers()[String(u.email || "").toLowerCase()]; return e && e.online ? e.profile : null; })();
+    var fallback = function () { if (cached) { var c = pickProfile(cached); c.uid = u.uid; return c; } return base; };           // offline: use the copy saved on this device
+    var load = fb.db.collection("quizMasters").doc(u.uid).get().then(function (d) {
+      if (d && d.exists) { var x = d.data(); base.name = x.name || base.name; base.org = x.org || ""; base.country = x.country || ""; base.usage = x.usage || ""; base.consent = x.consent !== false; base.terms = x.terms || ""; return base; }
+      return fallback();
+    });
+    var wait = new Promise(function (res) { setTimeout(function () { res(null); }, 6000); });
+    return Promise.race([load, wait]).then(function (p) { return p || fallback(); }).catch(fallback);
   }
   function skipProfile() { return { email: "test@skip.local", name: "Test user", org: "Test", country: "", usage: "", consent: false, terms: S.termsVersion, skipped: true }; }
   /* Saves the login in Firestore: profile (login count, last login) and one record per login in quizMasters/{uid}/logins.
@@ -274,34 +329,34 @@
     var F = window.firebase.firestore.FieldValue, ref = fb.db.collection("quizMasters").doc(p.uid);
     return ref.get().then(function (d) {
       if (d.exists) return ref.update({ lastLoginAt: F.serverTimestamp(), loginCount: F.increment(1) });
-      return ref.set({ name: p.name || "", email: p.email, org: p.org || "", country: p.country || "", usage: p.usage || "", consent: p.consent !== false, terms: p.terms || "", termsAt: F.serverTimestamp(), createdAt: F.serverTimestamp(), lastLoginAt: F.serverTimestamp(), loginCount: 1 });
+      return ref.set({ name: p.name || "", email: p.email, org: p.org || "", country: p.country || "", usage: p.usage || "", consent: p.consent !== false, terms: p.terms || S.termsVersion, termsAt: F.serverTimestamp(), createdAt: F.serverTimestamp(), lastLoginAt: F.serverTimestamp(), loginCount: 1 });
     }).then(function () {
       return ref.collection("logins").add({ at: F.serverTimestamp(), method: "password", uiLang: ui, agent: String(navigator.userAgent || "").slice(0, 200) });
     }).catch(function () {});
   }
   /* A new or changed version of the Terms must be accepted before the account is used (sign-up already did it) */
   function onLogin(p, isNew) {
-    if (S.requireTerms && S.requireLogin && !p.skipped && p.terms !== S.termsVersion) {
+    if (S.requireTerms && S.reacceptTerms && S.requireLogin && !p.skipped && p.terms !== S.termsVersion) {
       openTerms({ mode: "required", onAccept: function () { acceptTermsFor(p).then(function () { p.terms = S.termsVersion; finishLogin(p, isNew); }); }, onDecline: function () { signOut(); } });
       return;
     }
     finishLogin(p, isNew);
   }
   function finishLogin(p, isNew) {
-    user = p; loadBank(); loadKb(); loadSetups(); fbRecordLogin(p); checkAdmin(); paintOwn();
+    user = p; cacheProfile(p); loadBank(); loadKb(); loadSetups(); fbRecordLogin(p); checkAdmin(); paintOwn();
     if (S.firebase.measurementId) window["ga-disable-" + S.firebase.measurementId] = (p.consent === false);
     if (fb.analytics) { try { fb.analytics.setAnalyticsCollectionEnabled(p.consent !== false); if (p.uid) fb.analytics.setUserId(p.uid); } catch (e) {} }
     track(isNew ? "sign_up" : "login", { method: fb.on ? "firebase" : "local" });
-    $("uchip").textContent = (p.name || p.email) + (p.org ? " - " + p.org : "");
+    $("uname").textContent = p.name || p.email; $("uchip").title = (p.org || "");
     $("authErr").textContent = ""; $("inPass").value = ""; $("upPass").value = "";
-    goHomePage();
+    if (pendingRoute && ROUTE_TABLE[pendingRoute]) { var r0 = pendingRoute; pendingRoute = ""; applyRoute(r0); } else goHomePage();                   // a page address opened before sign-in is shown after it
     fbLoadBank();
   }
   function signOut() {
     var done = function () {
       if (S.firebase.measurementId) window["ga-disable-" + S.firebase.measurementId] = true;
       if (fb.analytics) { try { fb.analytics.setAnalyticsCollectionEnabled(false); } catch (e) {} }
-      user = null; bank = []; kbMeta = []; setups = []; isAdmin = false; $("goAdmin").hidden = true; ownApp = null; if ($("savedList")) renderSaved(); lsDel("qms.session"); $("uchip").textContent = ""; $("inEmail").value = ""; $("inPass").value = "";
+      user = null; bank = []; kbMeta = []; setups = []; isAdmin = false; $("goAdmin").hidden = true; ownApp = null; if ($("savedList")) renderSaved(); sessDel(); $("uname").textContent = ""; resetUrl(); $("inEmail").value = ""; $("inPass").value = "";
       ["upName", "upEmail", "upOrg", "upCountry", "upPass"].forEach(function (id) { $(id).value = ""; });
       $("upUsage").value = ""; resetTermsBox("upTerms"); resetTermsBox("pfTerms"); $("tbRight").hidden = true; hideVerify(); setAuthTab("in"); authBusy(false); show("auth");
     };
@@ -325,7 +380,7 @@
       if (!email || !pw) { $("authErr").textContent = T("errFill"); return; }
       if (!validEmail(email)) { $("authErr").textContent = T("errEmail"); return; }
       $("authErr").textContent = ""; authBusy(true);
-      doSignIn(email, pw).then(function (p) { authBusy(false); if (p && p.pendingVerify) showVerify(p.email); else onLogin(p, false); }, authFail);
+      doSignIn(email, pw, $("inRemember").checked).then(function (p) { authBusy(false); if (p && p.pendingVerify) showVerify(p.email); else onLogin(p, false); }, authFail);
     });
     $("btnUp").addEventListener("click", function (ev) {
       ev.preventDefault();
@@ -336,7 +391,7 @@
       if (S.requireTerms && !$("upTerms").checked) { $("authErr").textContent = T("errTerms"); return; }
       if (pw.length < 6) { $("authErr").textContent = T("errPass"); return; }
       $("authErr").textContent = ""; authBusy(true);
-      doSignUp(p, pw).then(function (prof) { authBusy(false); if (prof && prof.pendingVerify) showVerify(prof.email); else onLogin(prof, true); }, authFail);
+      doSignUp(p, pw, $("upRemember").checked).then(function (prof) { authBusy(false); if (prof && prof.pendingVerify) showVerify(prof.email); else onLogin(prof, true); }, authFail);
     });
     // no <form> elements: the claude.ai page sandbox blocks form submission, so Enter is handled here
     [["formIn", "btnIn"], ["formUp", "btnUp"]].forEach(function (p) {

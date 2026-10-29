@@ -6,7 +6,7 @@
    ===================================================================== */
 var QUIZ_I18N = {};
 QUIZ_I18N.en = {
-  home: "Home", homeConfirm: "Press Home again to leave this quiz.", dashTitle: "Oral Bible Quiz Builder", dashBtn: "Quiz Builder",
+  home: "Home", homeConfirm: "Press Home again to leave this quiz.", dashTitle: "OBQ Quiz Builder", dashBtn: "Quiz Builder",
   /* sign in / sign up */
   skipLogin: "Skip login (testing only)", tabIn: "Sign in", tabUp: "Sign up", email: "Email", pass: "Password", fullName: "Full name", org: "Organisation", country: "Country / region",
   usage: "Main use of this quiz", use1: "Church or ministry", use2: "School or college", use3: "Community or youth group", use4: "Workplace or other",

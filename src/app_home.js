@@ -15,47 +15,159 @@
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/>',
     shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
     star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    house: '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+    id: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-2 5.5-2 6 0M15 10h3M15 14h3"/>',
+    logout: '<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
+    download: '<path d="M12 3v12M7 10l5 5 5-5M5 20h14"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
   };
-  function icon(name) { return '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || "") + "</svg>"; }
+  function icon(name, size) { size = size || 30; return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || "") + "</svg>"; }
 
   /* ---------- opening pages ---------- */
-  function goHomePage() { stopTimer(); stopSpeech(); paintHome(); show("home"); }
+  function goHomePage() {
+    stopTimer(); stopSpeech();
+    if (S.edition === "basic") { if (user && user.name) openLite(); else showWelcome(); return; }          // the basic version has no Home page: its start is the quick-quiz page
+    paintHome(); show("home"); setUrl("");
+  }
+  /* ---------- the very basic version: key in your name, set up a quick quiz, run it ---------- */
+  function showWelcome() {
+    $("wName").value = lsGet("qms.basicName", ""); langOptions($("wLang"), ui); $("wErr").textContent = ""; show("welcome");
+    setTimeout(function () { try { $("wName").focus(); } catch (e) {} }, 50);
+  }
+  function welcomeGo() {
+    var n = normName($("wName").value);
+    if (!n) { $("wErr").textContent = T("errName"); return; }
+    lsSet("qms.basicName", n); user = { email: "", name: n, org: "", country: "", usage: "", consent: false, terms: S.termsVersion }; openLite();
+  }
   function openBuilder(panelId) {
-    paintDashboard(); show("dashboard");
+    paintDashboard(); show("dashboard"); setUrl(PANEL_ROUTE[panelId] || "builder");
     if (panelId) setTimeout(function () { var p = $(panelId); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   }
-  function openAdmin() { show("admin"); adminLoad(); }
-  function openSaved() { goSetup(); setTimeout(function () { var p = $("savedBox"); if (p && !p.hidden) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); }
+  function openAdmin() { show("admin"); adminLoad(); setUrl("admin"); }
+  function openMyQuizzes() {                                       // "My Quizzes": the saved quizzes on the set-up page
+    routing = true; goSetup(); routing = false; setUrl("my-quizzes");
+    $("savedBox").hidden = false; $("savedEmpty").hidden = setups.length > 0;
+    setTimeout(function () { var p = $("savedBox"); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+  }
+  var openSaved = openMyQuizzes;
 
-  /* ---------- Home cards ---------- */
-  var HOME_CARDS = [
-    { id: "setup",    icon: "sliders", t: "hSetup",    d: "hSetupD",    lite: false, go: goSetup },
-    { id: "lite",     icon: "bolt",    t: "hLite",     d: "hLiteD",     lite: true,  go: function () { openLite(); } },
-    { id: "demo",     icon: "trophy",  t: "hDemo",     d: "hDemoD",     lite: true,  go: function () { runDemo(); } },
-    { id: "saved",    icon: "star",    t: "hSaved",    d: "hSavedD",    lite: false, go: openSaved },
-    { id: "builder",  icon: "tools",   t: "hBuilder",  d: "hBuilderD",  lite: false, go: function () { openBuilder(""); } },
-    { id: "bank",     icon: "book",    t: "hBank",     d: "hBankD",     lite: false, go: function () { openBuilder("panelBank"); } },
-    { id: "kb",       icon: "text",    t: "hKb",       d: "hKbD",       lite: false, go: function () { openBuilder("panelKb"); } },
-    { id: "results",  icon: "chart",   t: "hResults",  d: "hResultsD",  lite: false, go: function () { openBuilder("panelHist"); } },
-    { id: "activity", icon: "pulse",   t: "hActivity", d: "hActivityD", lite: false, go: function () { openBuilder("panelActivity"); } },
-    { id: "firebase", icon: "cloud",   t: "hOwn",      d: "hOwnD",      lite: false, go: function () { openBuilder("panelOwn"); } },
-    { id: "settings", icon: "gear",    t: "hSettings", d: "hSettingsD", lite: true,  go: function () { openSettings(); } },
-    { id: "help",     icon: "help",    t: "hHelp",     d: "hHelpD",     lite: true,  go: function () { show("qmguide"); } },
-    { id: "admin",    icon: "shield",  t: "hAdmin",    d: "hAdminD",    lite: false, adminOnly: true, go: openAdmin }
+  /* ---------- Home menu: "Run a quiz", one "Quiz Builder" box with all its tools, and "Account and help" ---------- */
+  var HOME_ITEMS = {
+    setup:    { icon: "sliders", t: "hSetup",    d: "hSetupD",    lite: false, go: goSetup },
+    lite:     { icon: "bolt",    t: "hLite",     d: "hLiteD",     lite: true,  go: function () { openLite(); } },
+    demo:     { icon: "trophy",  t: "hDemo",     d: "hDemoD",     lite: true,  go: function () { runDemo(); } },
+    saved:    { icon: "star",    t: "hSaved",    d: "hSavedD",    lite: false, go: openSaved },
+    bank:     { icon: "book",    t: "hBank",     d: "hBankD",     lite: false, go: function () { openBuilder("panelBank"); } },
+    kb:       { icon: "text",    t: "hKb",       d: "hKbD",       lite: false, go: function () { openBuilder("panelKb"); } },
+    results:  { icon: "chart",   t: "hResults",  d: "hResultsD",  lite: false, go: function () { openBuilder("panelHist"); } },
+    activity: { icon: "pulse",   t: "hActivity", d: "hActivityD", lite: false, go: function () { openBuilder("panelActivity"); } },
+    firebase: { icon: "cloud",   t: "hOwn",      d: "hOwnD",      lite: false, go: function () { openBuilder("panelOwn"); } },
+    settings: { icon: "gear",    t: "hSettings", d: "hSettingsD", lite: true,  go: function () { openSettings(); } },
+    help:     { icon: "help",    t: "hHelp",     d: "hHelpD",     lite: true,  go: function () { openQmGuide(); } },
+    admin:    { icon: "shield",  t: "hAdmin",    d: "hAdminD",    lite: false, adminOnly: true, go: openAdmin }
+  };
+  var HOME_GROUPS = [
+    { id: "run",     title: "hGroupRun",  items: ["setup", "lite", "demo", "saved"] },
+    { id: "builder", title: "hBuilder",   desc: "hBuilderD", box: true, items: ["bank", "kb", "results", "activity", "firebase"] },
+    { id: "more",    title: "hGroupMore", items: ["settings", "help", "admin"] }
   ];
-  function paintHome() {
-    var li = S.edition === "lite";
-    $("homeWelcome").textContent = T("homeWelcome", { name: (user && user.name) || "" });
-    var box = $("homeCards"); clear(box);
-    HOME_CARDS.forEach(function (c) {
-      if ((li && !c.lite) || (c.adminOnly && !isAdmin)) return;
-      var b = el("button", "cardbtn"); b.type = "button"; b.setAttribute("data-card", c.id);
-      b.insertAdjacentHTML("beforeend", icon(c.icon));
-      var tx = el("span", "ctext"); tx.appendChild(el("span", "ct", T(c.t))); tx.appendChild(el("span", "cd", T(c.d))); b.appendChild(tx);
-      b.addEventListener("click", c.go); box.appendChild(b);
+  function homeItemOK(id, li) { var it = HOME_ITEMS[id]; return !((li && !it.lite) || (it.adminOnly && !isAdmin)); }
+  function paintHomeMenu() {
+    var li = S.edition === "lite", box = $("homeCards"); clear(box);
+    HOME_GROUPS.forEach(function (g) {
+      var ids = g.items.filter(function (id) { return homeItemOK(id, li); }); if (!ids.length) return;
+      var sec = el("section", "hgroup" + (g.box ? " box" : "")); sec.setAttribute("data-group", g.id);
+      if (g.box) {                                                          // all Quiz Builder tools in one box; its heading opens the Builder
+        var head = el("button", "boxhead"); head.type = "button"; head.setAttribute("data-card", "builder"); head.insertAdjacentHTML("beforeend", icon("tools"));
+        var tx = el("span", "ctext"); tx.appendChild(el("span", "ct", T(g.title))); tx.appendChild(el("span", "cd", T(g.desc))); head.appendChild(tx);
+        head.addEventListener("click", function () { openBuilder(""); }); sec.appendChild(head);
+        ids.forEach(function (id) {
+          var it = HOME_ITEMS[id], r = el("button", "hrow"); r.type = "button"; r.setAttribute("data-card", id); r.insertAdjacentHTML("beforeend", icon(it.icon));
+          r.appendChild(el("span", "rt", T(it.t))); r.appendChild(el("span", "cd", T(it.d))); r.addEventListener("click", it.go); sec.appendChild(r);
+        });
+      } else {
+        sec.appendChild(el("h3", "gtitle", T(g.title)));
+        var grid = el("div", "cards");
+        ids.forEach(function (id) {
+          var it = HOME_ITEMS[id], b = el("button", "cardbtn"); b.type = "button"; b.setAttribute("data-card", id); b.insertAdjacentHTML("beforeend", icon(it.icon));
+          var t2 = el("span", "ctext"); t2.appendChild(el("span", "ct", T(it.t))); t2.appendChild(el("span", "cd", T(it.d))); b.appendChild(t2);
+          b.addEventListener("click", it.go); grid.appendChild(b);
+        });
+        sec.appendChild(grid);
+      }
+      box.appendChild(sec);
     });
-    $("goDash").hidden = li; $("homeLogo").hidden = $("logo").hidden; if (!$("logo").hidden) $("homeLogo").src = $("logo").src;
+  }
+
+  /* ---------- Home: announcement, offline note, events, numbers, checklist, tip ---------- */
+  function fmtDay(iso) {
+    try { return new Date(iso + "T00:00:00").toLocaleDateString(langInfo(ui).locale || ui, { weekday: "short", day: "numeric", month: "short", year: "numeric" }); } catch (e) { return iso; }
+  }
+  function daysUntil(iso) { return Math.round((new Date(iso + "T00:00:00") - new Date(todayISO() + "T00:00:00")) / 86400000); }
+  function paintAnnounce() {
+    var a = S.announcement || {}, on = !!(a.title || a.text), url = /^https?:\/\//i.test(a.linkUrl || "") ? a.linkUrl : "";
+    $("homeAnnounce").hidden = !on; if (!on) return;
+    $("annTitle").textContent = a.title || ""; $("annDate").textContent = a.date ? fmtDay(a.date) : ""; $("annText").textContent = a.text || "";
+    var l = $("annLink"); l.hidden = !url; if (url) { l.href = url; l.textContent = a.linkText || url; }
+  }
+  var TIPS = ["tip1", "tip2", "tip3", "tip4", "tip5", "tip6", "tip7", "tip8", "tip9", "tip10", "tip11", "tip12"];
+  function paintEvents() {
+    var box = $("homeEvents"); clear(box);
+    if (S.edition === "lite") { box.hidden = true; return; } box.hidden = false;
+    box.appendChild(el("h2", "gh", T("evTitle")));
+    var grid = el("div", "evgrid"), hist = history(), st = stats(), today = todayISO();
+    /* upcoming events: saved quizzes that were scheduled for a date */
+    var up = setups.filter(function (s) { return s.kind === "event" && s.cfg && s.cfg.date && s.cfg.date >= today; }).sort(function (a, b) { return String(a.cfg.date).localeCompare(String(b.cfg.date)); }).slice(0, 3);
+    var c1 = el("div"); c1.appendChild(el("h3", null, T("evUpcoming")));
+    if (!up.length) { c1.appendChild(el("p", "note", T("evNoUpcoming"))); var plan = el("button", "ghost sm", T("evPlan")); plan.type = "button"; plan.addEventListener("click", goSetup); c1.appendChild(plan); }
+    up.forEach(function (it) {
+      var c = it.cfg, n = daysUntil(c.date), row = el("div", "evitem");
+      row.appendChild(el("b", null, c.event || it.name));
+      row.appendChild(el("span", "when", fmtDay(c.date) + " - " + (n === 0 ? T("evToday") : (n === 1 ? T("evTomorrow") : T("evIn", { n: n })))));
+      row.appendChild(el("span", "note", T("evLine", { p: c.parts || "-", lang: c.quizLangLabel || c.quizLang || "", n: c.numQ || "" })));
+      var bt = el("div", "evbtns"), go = el("button", "primary sm", T("ssStart")); go.type = "button"; go.addEventListener("click", function () { useSetup(it); onBegin(); });
+      var op = el("button", "ghost sm", T("ssOpen")); op.type = "button"; op.addEventListener("click", function () { useSetup(it); });
+      bt.appendChild(go); bt.appendChild(op); row.appendChild(bt); c1.appendChild(row);
+    });
+    grid.appendChild(c1);
+    /* recent finished quizzes */
+    var c2 = el("div"); c2.appendChild(el("h3", null, T("evRecent")));
+    if (!hist.length) c2.appendChild(el("p", "note", T("evNoRecent")));
+    hist.slice(0, 3).forEach(function (r) {
+      var row = el("div", "evitem"); row.appendChild(el("b", null, r.event || "-"));
+      row.appendChild(el("span", "when", r.date ? fmtDay(r.date) : ""));
+      row.appendChild(el("span", "note", (r.winners && r.winners.length ? T("evWinners", { w: r.winners.slice(0, 2).join(", ") }) + " - " : "") + T("evNames", { n: r.resultsCount || 0 })));
+      c2.appendChild(row);
+    });
+    if (hist.length) { var all = el("button", "ghost sm", T("evAll")); all.type = "button"; all.addEventListener("click", function () { openBuilder("panelHist"); }); c2.appendChild(all); }
+    grid.appendChild(c2);
+    /* numbers */
+    var names = hist.reduce(function (n, r) { return n + (r.resultsCount || 0); }, 0), c3 = el("div"); c3.appendChild(el("h3", null, T("evGlance")));
+    var tiles = el("div", "tiles");
+    [[st.quizzes || 0, "aQuizzes"], [hist.length, "aFinished"], [st.participants || 0, "aParts"], [st.questions || 0, "aQs"]].forEach(function (x) {
+      var t = el("div", "tile"); t.appendChild(el("b", null, String(x[0]))); t.appendChild(el("span", null, T(x[1]))); tiles.appendChild(t);
+    });
+    c3.appendChild(tiles); grid.appendChild(c3); box.appendChild(grid);
+    /* getting started: until every step is done */
+    var steps = [["ck1", !!lsGet("qms.demoDone", false), function () { runDemo(); }], ["ck2", bank.length > 0 || kbMeta.length > 0, function () { openBuilder("panelBank"); }],
+                 ["ck3", hist.length > 0, function () { goSetup(); }], ["ck4", (st.pdfs || 0) > 0 || !!lsGet("qms.csvDone", false), function () { openBuilder("panelHist"); }]];
+    if (steps.some(function (s) { return !s[1]; })) {
+      var ck = el("div", "checklist"); ck.appendChild(el("b", null, T("ckTitle")));
+      steps.forEach(function (s) {
+        var chip = el("button", "ck" + (s[1] ? " done" : "")); chip.type = "button"; chip.textContent = (s[1] ? "\u2713 " : "\u25CB ") + T(s[0]);
+        if (!s[1]) chip.addEventListener("click", s[2]); ck.appendChild(chip);
+      });
+      box.appendChild(ck);
+    }
+    var d = new Date(); box.appendChild(el("p", "tip", T("tipLabel") + " " + T(TIPS[Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000) % TIPS.length])));
+  }
+  function paintHome() {
+    $("homeWelcome").textContent = T("homeWelcome", { name: (user && user.name) || "" });
+    paintAnnounce(); paintHomeMenu(); paintEvents();
+    var off = $("homeOffline"); off.hidden = !(offlineMode && fbConfigured()); off.textContent = off.hidden ? "" : T("homeOffline");
+    paintInstall(); $("goDash").hidden = S.edition === "lite"; $("goQuizzes").hidden = $("goResults").hidden = S.edition === "lite"; $("homeLogo").hidden = $("logo").hidden; if (!$("logo").hidden) $("homeLogo").src = $("logo").src;
     paintVerse();
   }
 
@@ -92,7 +204,7 @@
   function runDemo() {
     var c = { qm: (user && user.name) || "", event: T("srcSample"), date: todayISO(), parts: 1, uiLang: ui, quizLang: "en", quizLangLabel: "English", mode: "individual", style: "normal",
               scope: "any", books: [], numQ: ROUNDS_SAMPLE.length, source: "sample", sample: true, saveResults: false };
-    quizLang = "en"; track("sample_quiz");
+    quizLang = "en"; track("sample_quiz"); lsSet("qms.demoDone", true);
     startQuiz(c, finalizeRounds(JSON.parse(JSON.stringify(ROUNDS_SAMPLE))));
   }
 
@@ -110,6 +222,7 @@
   }
   function paintLite() {
     if (!lite.numQ) lite.numQ = S.questionCounts[0];
+    if (S.edition === "basic") { lite.langPick = "en"; }
     langOptions($("lLang"), lite.langPick, true); $("lOtherWrap").hidden = $("lLang").value !== "other";
     var ps = $("lPart"), pv = ps.value || "bible"; clear(ps);
     [["bible", "scBible"], ["nt", "scNT"], ["ot", "scOT"]].forEach(function (p) { var o = el("option", null, T(p[1])); o.value = p[0]; ps.appendChild(o); });
@@ -122,7 +235,12 @@
       b.addEventListener("click", function () { lite.numQ = n; paintLite(); }); qc.appendChild(b);
     });
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-lmode]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lmode") === lite.mode ? "true" : "false"); });
-    $("lReadWrap").hidden = !speechOK; refreshVoicePickers(); liteAvail();
+    $("lReadWrap").hidden = !speechOK; refreshVoicePickers();
+    if (S.edition === "basic") {                                      // English quick quiz only, no voice picker, and the button goes back to the name page
+      $("liteWho").hidden = false; $("liteWho").textContent = T("liteWho", { name: (user && user.name) || "" });
+      $("lLangField").hidden = true; $("lOtherWrap").hidden = true; $("lVoiceWrap").hidden = true; $("liteHome").textContent = T("basicChange");
+    }
+    liteAvail();
   }
   function liteAvail() {
     var c = liteCfg(), t = $("liteAvail"); $("liteErr").textContent = ""; t.textContent = "";
@@ -131,7 +249,7 @@
     if (c.source === "kb") { var have = scopeCodes(c).filter(function (code) { return kbHas(c.quizLang, code); }); t.textContent = have.length ? T("kbAvail", { n: have.length }) : T("kbNone"); return; }
     var n = buildPool(c).length; t.textContent = n ? T("avail", { n: n }) : T("availNone");
   }
-  function openLite() { paintLite(); show("lite"); }
+  function openLite() { paintLite(); show("lite"); setUrl("quick-quiz"); }
   function liteStart() {
     var c = liteCfg(), box = $("liteErr");
     if (!c.quizLang) { box.textContent = T("errOtherLang"); return; }
@@ -139,9 +257,15 @@
     box.textContent = ""; beginWith(c, box, true);
   }
   function wireHome() {
+    Array.prototype.forEach.call(document.querySelectorAll("#dashboard [data-jump]"), function (b) {
+      b.addEventListener("click", function () { var p = $(b.getAttribute("data-jump")); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); });
+    });
     $("votdNext").addEventListener("click", function () { votdOffset++; paintVerse(); });
     $("lLang").addEventListener("change", function () { lite.langPick = $("lLang").value; $("lOtherWrap").hidden = lite.langPick !== "other"; liteAvail(); });
     $("lOther").addEventListener("input", liteAvail); $("lPart").addEventListener("change", liteAvail);
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-lmode]"), function (b) { b.addEventListener("click", function () { lite.mode = b.getAttribute("data-lmode"); paintLite(); }); });
-    $("liteStart").addEventListener("click", liteStart); $("liteHome").addEventListener("click", goHomePage);
+    $("bSetupBtn").addEventListener("click", goSetup);
+    $("liteStart").addEventListener("click", liteStart); $("liteHome").addEventListener("click", function () { if (S.edition === "basic") showWelcome(); else goHomePage(); });
+    $("wGo").addEventListener("click", welcomeGo); $("wName").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); welcomeGo(); } });
+    $("wLang").addEventListener("change", function () { setUi($("wLang").value); });
   }

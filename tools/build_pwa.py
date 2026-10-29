@@ -28,11 +28,23 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 }
 </script>
 </body>'''
-assert SRC.count("</head>") == 1 and SRC.count("</body>") == 1
-open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(SRC.replace("</head>", head).replace("</body>", reg))
+assert SRC.count("</head>") == 1 and SRC.count("</body>") == 1 and SRC.count("<head>") == 1
+# page addresses: every page has an address such as /instructions or /builder/questionbank. This tiny script (first in the head) works out the
+# folder the app lives in, so that the page and its files load from any of those addresses.
+ROUTES = ["builder/questionbank", "builder/knowledge-base", "builder/results", "builder/firebase", "builder/activity", "builder/remote", "builder",
+          "instructions", "settings", "profile", "my-quizzes", "results", "setup", "quick-quiz", "admin"]
+base_js = ("<script>(function(){var p=location.pathname;if(!/^https?:$/.test(location.protocol)||p.charAt(0)!==\"/\")return;var R=" + json.dumps(ROUTES) +
+           ";var q=p.replace(/index\\.html$/,\"\").replace(/\\/+$/,\"\"),b=null,i,s;for(i=0;i<R.length;i++){s=\"/\"+R[i];if(q.length>=s.length&&q.slice(-s.length)===s){b=q.slice(0,q.length-s.length)+\"/\";break;}}"
+           "if(b===null)b=p.replace(/[^\\/]*$/,\"\");window.__OBQ_BASE=b;document.write('<base href=\"'+b+'\">');})();</script>")
+page = SRC.replace("<head>", "<head>\n" + base_js, 1).replace("</head>", head).replace("</body>", reg)
+open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(page)
+for r in ROUTES:                                   # a real page for every address, so a direct link or a reload works on any static host
+    os.makedirs(os.path.join(OUT, r), exist_ok=True); open(os.path.join(OUT, r, "index.html"), "w", encoding="utf-8").write(page)
+open(os.path.join(OUT, "404.html"), "w", encoding="utf-8").write(page)          # any other address opens the app too
 
 # manifest
-json.dump({"id": "./index.html", "name": name, "short_name": short, "description": "Host-run oral quiz for live meetings.",
+json.dump({"id": "./index.html", "name": name, "short_name": short, "description": "Lead live Bible quizzes for groups who learn by listening. Installs on your phone or computer and runs offline.", "categories": ["education", "productivity"],
+           "shortcuts": [{"name": "My Quizzes", "url": "./my-quizzes", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]}, {"name": "Quiz Builder", "url": "./builder", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]}, {"name": "Settings", "url": "./settings", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]}],
            "lang": "en", "dir": "auto", "start_url": "./index.html", "scope": "./", "display": "standalone",
            "display_override": ["standalone", "minimal-ui"], "orientation": "any", "background_color": bg, "theme_color": bg,
            "icons": [{"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
@@ -61,7 +73,7 @@ for fn, sz, m in [("icon-180.png", 180, False), ("icon-192.png", 192, False), ("
 open(os.path.join(OUT, "sw.js"), "w", encoding="utf-8").write(f'''// {name} - service worker (version {ver} is derived from index.html automatically)
 const CACHE = "qms-{ver}";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./icons/icon-180.png"];
-const RUNTIME_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com"];   // fonts and the Excel reader, kept for offline use
+const RUNTIME_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com", "cdnjs.cloudflare.com", "www.gstatic.com"];   // fonts, the Excel reader and the Firebase library (www.gstatic.com), kept for offline use
 self.addEventListener("install", (e) => {{ e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); }});
 self.addEventListener("activate", (e) => {{
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
@@ -79,14 +91,17 @@ self.addEventListener("fetch", (event) => {{
   }}
   if (url.origin !== self.location.origin) return;
   if (req.mode === "navigate") {{
-    event.respondWith(fetch(req).then((res) => {{ const copy = res.clone(); caches.open(CACHE).then((c) => c.put("./index.html", copy)); return res; }}).catch(() => caches.match("./index.html")));
+    const root = new URL("./", self.location).pathname;
+    if (!url.pathname.startsWith(root) || url.pathname.startsWith(root + "basic/")) return;       // other pages on this site (for example /basic/) are not part of this app
+    const isStart = url.pathname === root || url.pathname === root + "index.html";
+    event.respondWith(fetch(req).then((res) => {{ if (isStart) {{ const copy = res.clone(); caches.open(CACHE).then((c) => c.put("./index.html", copy)); }} return res; }}).catch(() => caches.match("./index.html")));   // every page address opens the app, also offline
     return;
   }}
   event.respondWith(caches.match(req).then((hit) => hit || fetch(req)));
 }});
 ''')
 
-open(os.path.join(OUT, "firebase.json"), "w").write(json.dumps({"hosting": {"public": ".", "ignore": ["firebase.json", "**/.*", "README-hosting.txt"]}}, indent=2))
+open(os.path.join(OUT, "firebase.json"), "w").write(json.dumps({"hosting": {"public": ".", "ignore": ["firebase.json", "**/.*", "README-hosting.txt"], "rewrites": [{"source": "**", "destination": "/index.html"}]}}, indent=2))
 open(os.path.join(OUT, "README-hosting.txt"), "w", encoding="utf-8").write(f"""{name} - installable app
 ==========================================
 

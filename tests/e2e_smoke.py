@@ -14,6 +14,7 @@ try:
         pg.goto("http://localhost:8799/host.html"); pg.wait_for_timeout(800)
         f = pg.frame_locator("#f"); screen = lambda: pg.frames[1].evaluate("document.body.dataset.screen")
         assert screen() == "auth"
+        if f.locator("#authOffline").is_visible(): f.locator("#authOfflineGo").click(); pg.wait_for_timeout(300)      # a build with Firebase settings cannot reach Firebase here: continue with a local account
         f.locator("#tabUp").click(); f.locator("#upName").fill("Ann"); f.locator("#upEmail").fill("ann@e.org"); f.locator("#upOrg").fill("X")
         f.locator("#upCountry").fill("IN"); f.locator("#upUsage").select_option("school"); f.locator("#upPass").fill("abcdef")
         f.locator("#upTermsLink").click(); pg.frames[1].evaluate("document.getElementById('termsBody').scrollTop=99999"); pg.wait_for_timeout(200); f.locator("#termsAccept").click()

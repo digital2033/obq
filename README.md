@@ -9,9 +9,26 @@
 
 ## Features
 
+### Navigation and page addresses
+- A top bar with an icon for each item: **Home, Instructions, My Quizzes** (saved quizzes), **Quiz Results, Quiz Builder**, the **interface language chooser, Settings**, your name, **My Profile, Sign out** (and Admin for admins). It adapts to the screen: full labels, compact, or icons only.
+- Every page has its own address (works as a direct link or bookmark): `/instructions`, `/settings`, `/profile`, `/my-quizzes`, `/results`, `/setup`, `/quick-quiz`, `/builder`, `/builder/questionbank`, `/builder/knowledge-base`, `/builder/results`, `/builder/firebase`, `/builder/activity`, `/builder/remote`. An address opened before sign-in opens after it; the Back button works between pages but never leaves a running quiz.
+
+### Install and offline
+- **Installable app (PWA):** install it from the Home page or **Settings, Install and offline use** (or the browser's install option; on iPhone, Share, then Add to Home Screen). It then opens like an app and runs offline.
+- **Works without internet:** quizzing, PDF and CSV, the timer, read aloud (with an installed voice). **Needs internet:** sending results to your Firebase, cloud sync, Bible Brain downloads, usage counting. The app must be installed or opened once online first.
+
+### OBQ Quiz Builder
+- A first **Set up a quiz** box, then Question Bank, Bible Knowledge Base, Quiz Results, My Firebase Backup, Activity and a remote tester, with a jump bar.
+- **Activity on this device:** quizzes run and finished, **total participants** from the quiz set-ups, **languages used**, questions asked, PDFs saved, names on points lists, questions in your question bank and in the built-in bank, Bible texts and books in your knowledge base.
+
 ### Home page
-- Introduction, a **Verse of the Day** (58 verses, King James Version; shown from your own Bible text when you have loaded one in the interface language) and a button for every feature.
-- Buttons: Set up a quiz, OBQ Lite, Demo Contest, My saved quizzes, Quiz Builder, Question Bank, Bible Text Knowledge Base, Quiz Results, Activity Dashboard, My Firebase Backup, Settings, Quiz Master Instructions (and Admin for admins).
+- Introduction, an optional **announcement** banner (for an event or campaign: set `announcement` in `src/cfg1.js` or in `private/site.config.json`), and the menu in three groups:
+  - **Run a quiz:** Set up a quiz, OBQ Lite, Demo Contest, My saved quizzes.
+  - **Quiz Builder** (one box with all its tools): Question Bank, Bible Knowledge Base, Quiz Results, Activity Dashboard, My Firebase Backup.
+  - **Account and help:** Settings, Quiz Master Instructions (and Admin for admins).
+- **Your events** panel: upcoming scheduled events (with Start now), recent finished quizzes, numbers at a glance, a Getting started checklist and a daily tip.
+- A **Verse of the Day** (58 verses, King James Version; shown from your own Bible text when you have loaded one in the interface language).
+- The Quiz Builder page has a jump bar to its sections.
 
 ### Starting a quiz
 - **Set up a quiz** (full control): Quiz Master name, event, date, number of participants, interface and quiz language (any language can be typed), **Individuals** (default) or **Groups**, quiz style, scope, number of questions, question source, read aloud, and optional send of results to your own Firebase.
@@ -53,7 +70,7 @@ In the Normal style a 10-question quiz follows this order and repeats for 20 and
 ### Questions
 - **Built-in English bank:** 1,390 questions across all 66 books (shipped encrypted; a 198-question sample is in plain text).
 - **Your own questions (Excel):** download the template in the Quiz Builder, fill in the **Questions** sheet (the **Examples** sheet shows each kind) and upload it. Columns: Language, Book, Category (One answer, Multiple choice, Short answer with hints, Clue based, Multi-part), Level (Regular, Trivia, Difficult), Question, Option A to D, Clue 1 to 5, Correct answer, Reference, More to know, Points, Seconds, Intro. Rows with a problem are skipped and listed with their row number; you can add to or replace your bank.
-- **Bible text knowledge base:** add Bible text in any language (USFM, USFX, USX, plain text, or a zip), import a bundle, or use the **Bible Brain browser**: enter your key, choose a country and a language, and download a USX or plain-text fileset. OBQ makes "complete the verse" and "which book is this verse from" questions and lets you preview them. The text stays on your device.
+- **Bible Knowledge Base:** add Bible text in any language (USFM, USFX, USX, plain text, or a zip), import a bundle, or use the **Bible Brain browser**: enter your key, choose a country and a language, and download a USX or USFM fileset (other text types are counted but not listed). OBQ makes "complete the verse" and "which book is this verse from" questions and lets you preview them. The text stays on your device.
 
 ### Results
 - Finished quizzes show the winners and the full points table.
@@ -63,10 +80,20 @@ In the Normal style a 10-question quiz follows this order and repeats for 20 and
 
 ### Accounts and settings
 - **Local mode** (no Firebase): accounts and data stay on the device.
-- **With Firebase:** sign-up with email confirmation, sign-in, **forgot password**, and **sign-in with an email link** (no password). New accounts accept the **Terms and Conditions** (which include the analytics notice) in a read-first pop-up; you are asked again when the terms version changes.
+- **With Firebase:** sign-up with email confirmation, sign-in, **forgot password**, and **sign-in with an email link** (no password). New accounts accept the **Terms and Conditions** (which include the analytics notice) once, at sign-up, in a read-first pop-up. If the online sign-in service cannot be reached, OBQ says so and lets you retry, instead of quietly switching to a local account.
 - **Settings:** an editable **profile** (name, organisation, country, use), theme (dark, light or match the device), font, text size (small to extra large), sounds, read-aloud speed, keep-awake during a quiz, and an **analytics on/off** switch.
 - **Activity dashboard** on the device, a remote-control tester, and built-in **instructions for Quiz Masters**.
 - **Admin screen** (accounts listed as admins): counts of quiz set-ups and Quiz Masters with CSV downloads.
+
+## Basic version (one simple file)
+
+`obq-basic.html` is a separate, very basic version for people who only want to run a quick quiz: **no login, no Home page, no Terms, no Settings, no saved quizzes, no Firebase, no analytics**. The Quiz Master types a name, sets up an OBQ Lite quick quiz (part of the Bible, number of questions, Individuals or Groups, optional read aloud), runs the event, and downloads a PDF of the results. It uses the built-in English question bank and works offline when saved to a computer or phone and opened directly.
+
+```
+python tools/assemble.py --basic     # makes dist/obq-basic.html
+```
+
+The GitHub Action also publishes it at `/basic/` next to the full app (for example `https://YOUR-NAME.github.io/REPO/basic/`).
 
 ## Basic usage
 
@@ -88,10 +115,10 @@ python tools/build_pwa.py         # dist/obq-app/ and dist/obq-app.zip: the inst
 python -m http.server 8000 --directory dist/obq-app      # then open http://localhost:8000
 ```
 
-Any static host works: upload `dist/obq-app/`. The included GitHub Action (`.github/workflows/deploy.yml`) builds and publishes the site with GitHub Pages (Settings, then Pages, then Source = GitHub Actions).
+Any static host works: upload `dist/obq-app/`. The build also makes a real page for every address above (and a `404.html`), so direct links and reloads work on GitHub Pages and similar hosts; on Firebase Hosting the generated `firebase.json` rewrites every address to the app. The included GitHub Action (`.github/workflows/deploy.yml`) builds and publishes the site with GitHub Pages (Settings, then Pages, then Source = GitHub Actions).
 
 ### Settings in `src/cfg1.js`
-App name and logo, `edition` (`full` or `lite`), `requireLogin`, `requireTerms` and `termsVersion`, `operatorName` and `contactEmail` (shown in the Terms), `defaultTheme` and the two colour palettes, question counts, `blueprint` and `simpleBlueprint` (question mix), `speechRate`, default seconds and points, and the Firebase settings. Interface text is in the `cfg2_*.js` files; the Terms text is `src/terms.html`; the Quiz Master instructions are `src/guide_qm.html`.
+App name and logo, `edition` (`full` or `lite`), `requireLogin`, `requireTerms`, `termsVersion` and `reacceptTerms` (false = the Terms are accepted once, at sign-up), `operatorName` and `contactEmail` (shown in the Terms), `defaultTheme` and the two colour palettes, question counts, `blueprint` and `simpleBlueprint` (question mix), `speechRate`, default seconds and points, and the Firebase settings. Interface text is in the `cfg2_*.js` files; the Terms text is `src/terms.html`; the Quiz Master instructions are `src/guide_qm.html`.
 
 ### Question bank
 `src/cfg3_bank.js` is a plain-text sample (198 questions, from `data/sample-question-bank.xlsx`). The full bank is stored **encrypted** in `src/cfg3_bank.enc.json`. The build embeds it, with the key, in the page when it has the key: set the environment variable `OBQ_BANK_KEY` or create `private/bank.key`; without a key the sample is used. To encrypt your own bank:
@@ -110,6 +137,18 @@ Without Firebase everything works in local mode. To turn on accounts and cloud f
 4. Restrict the browser API key to your site's address in Google Cloud.
 
 `private/` is ignored by git. Never upload it. The GitHub website's "upload files" button ignores `.gitignore`.
+
+## Offline use and staying signed in
+
+- **Install it** (browser menu, Install app, or Add to Home Screen) and open it once with internet; after that the app opens without internet and everything stored on the device is available: saved quizzes, question bank, Bible texts, results history, PDF and CSV, timer and read aloud.
+- **Remember me on this device** (ticked by default at sign-in and sign-up): the device stays signed in until the user presses Sign out, and, for an online account, a salted hash of the password and a copy of the profile are kept on that device so the same email and password also work **without internet**. The very first sign-in of an online account needs internet. The Firebase library is cached for offline starts. Settings has **Forget this device**. Not for shared computers.
+- Without internet these do not work: sending results to your Firebase, cloud sync, Bible Brain downloads, usage counting.
+
+## Signing in: local accounts and online accounts
+
+- **Local mode** (no Firebase settings): the account exists only in that browser, for that website address. Another browser or device, cleared browser data, or a different address (for example `localhost` instead of the published site) will not find it.
+- **Online accounts** (Firebase settings present): the account works from any device. The login page shows which mode is active. An account made in local mode does not exist online: create it again with the same email (saved quizzes on the device use the email, so they appear again).
+- If the page is set up for online accounts but cannot reach the sign-in service (no network yet, an ad blocker, a firewall), a box explains it with **Try again** and **Continue offline**. The Firebase library is cached for offline use after the first visit.
 
 ## Your data
 

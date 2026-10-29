@@ -9,13 +9,15 @@
   function langLabel(code) { var L = langInfo(code); if (L.code !== code) return code ? code.charAt(0).toUpperCase() + code.slice(1) : ""; return L.code === "en" ? "English" : L.native + " (" + L.english + ")"; }
   function detailRows() {
     var c = cfg, u = user || {};
-    return [
+    var rows = [
       [T("dQM"), c.qm], [T("dEmail"), u.email || "-"],
       [T("dOrg"), u.org || "-"], [T("dEvent"), c.event],
       [T("dDate"), fmtDate(c.date)], [T("dParts"), c.parts ? String(c.parts) : "-"],
       [T("dQLang"), c.quizLangLabel || langLabel(c.quizLang)], [T("dNumQ"), String(ROUNDS.length)],
       [T("dMode"), isGroup() ? T("mGroup") : T("mInd")], [T("dStyle"), c.style === "simple" ? T("styleSimple") : T("styleNormal")]
     ];
+    if (S.edition === "basic") rows = rows.filter(function (r) { return r[1] !== "-"; });          // no login: leave out the email, organisation and participant lines
+    return rows;
   }
   function loadLogo() {
     return new Promise(function (res) {
@@ -179,7 +181,7 @@
     refreshAvail();
   }
   function restoreSession() {
-    var key = lsGet("qms.session", "");
+    var key = sessGet();
     if (key === "skip") { if (S.skipLoginButton) onLogin(skipProfile(), false); return; }
     var u = key ? localUsers()[key] : null;
     if (u) onLogin(u.profile, false);
@@ -194,11 +196,16 @@
       .then(function (buf) { return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text(); })
       .then(function (txt) { JSON.parse(txt).forEach(function (r) { STARTER_BANK.push(r); }); STARTER = null; });
   }
+  function wireOffline() {
+    $("authRetry").addEventListener("click", function () { $("authRetry").disabled = true; hideVerify(); start(); setTimeout(function () { $("authRetry").disabled = false; }, 1500); });
+    $("authOfflineGo").addEventListener("click", function () { fbOfflineChosen = true; start(); });
+    window.addEventListener("online", function () { if (!$("authOffline").hidden) { hideVerify(); start(); } });       // network is back: try again by itself
+  }
   function boot() {
     paintBrand(); applySettings();
     var saved = lsGet("qms.ui", S.defaultUiLang);
     quizLangPick = S.defaultQuizLang; quizLang = quizLangPick; sel.numQ = S.questionCounts[0];
-    wireAuth(); wireSetup(); wireGame(); wireSettings();
+    wireAuth(); wireSetup(); wireGame(); wireSettings(); wireOffline();
     window.addEventListener("resize", function () { var a = document.activeElement; if (a && a.tagName === "INPUT") return; fitSoon(); });
     window.addEventListener("orientationchange", function () { setTimeout(fitSoon, 250); });
     document.addEventListener("fullscreenchange", function () { paintFs(); setTimeout(fitSoon, 150); });
@@ -211,18 +218,31 @@
     show("auth");
     ensureBank().catch(function () {}).then(function () { start(); });
   }
+  var fbOfflineChosen = false, offlineMode = false;
   function start() {
+    if (routingOK && !pendingRoute) pendingRoute = currentRoute();                                 // remember the page address that was opened
     if (!S.requireLogin) {
-      user = { email: "", name: "", org: "", country: "", usage: "", consent: true }; loadBank(); goHomePage(); return;
+      user = { email: "", name: "", org: "", country: "", usage: "", consent: true }; loadBank();
+      if (S.edition === "basic") { showWelcome(); return; }                 // the very basic version: just ask for the name
+      if (pendingRoute && ROUTE_TABLE[pendingRoute]) { var r1 = pendingRoute; pendingRoute = ""; applyRoute(r1); } else goHomePage(); return;
     }
+    if (fbOfflineChosen) { fb.on = false; offlineMode = true; hideVerify(); setAuthTab("in"); paintSelects(); restoreSession(); show("auth"); return; }     // the Quiz Master chose to work offline with a local account
     initFirebase().then(function (on) {
       paintSelects();
+      /* Online accounts are configured but the service could not be reached (no network yet, a blocker, a firewall): do NOT silently
+         switch to local accounts, because the online account would then look like a wrong password. Explain, and let the user retry. */
+      if (!on && fbConfigured()) {
+        var saved = sessGet();                                                                      // a remembered device can start without internet
+        if (saved && saved !== "skip" && localUsers()[saved]) { fb.on = false; fbOfflineChosen = true; offlineMode = true; hideVerify(); setAuthTab("in"); paintSelects(); restoreSession(); return; }
+        showAuthBox("authOffline"); return;
+      }
+      hideVerify(); setAuthTab("in");                                       // show the normal sign-in form again (after "Try again")
       if (on && fb.auth.isSignInWithEmailLink(window.location.href)) { finishLink(); return; }          // the page was opened from a sign-in link in an email
       if (on) {
         var first = true;
         fb.auth.onAuthStateChanged(function (u) {
           if (!first) return; first = false;
-          if (u) { if (needsVerify(u)) showVerify(u.email); else fbProfile(u).then(function (p) { onLogin(p, false); }); } else restoreSession();
+          if (u) { if (needsVerify(u)) showVerify(u.email); else fbProfile(u).then(function (p) { onLogin(p, false); }); }
         });
       } else restoreSession();
     });

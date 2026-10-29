@@ -512,8 +512,9 @@
       quiz_lang: cfg ? cfg.quizLang : "", ui_lang: cfg ? cfg.uiLang : "", scope: cfg ? cfg.scope : "", source: cfg ? cfg.source : "", participants: cfg ? cfg.parts : 0 });
     curRecord = (cfg && !cfg.sample) ? makeRecord(list, mins) : null;                  // results stay on this device
     if (curRecord) addHistory(curRecord);
-    $("csvBtn").hidden = !curRecord; $("saveCloud").hidden = !(curRecord && ownConnected());
-    $("saveRedo").hidden = !(cfg && !cfg.sample); clearOnNextSetup = true;           // the next time the setup page opens it starts empty (name kept)
+    var basic = S.edition === "basic";
+    $("csvBtn").hidden = basic || !curRecord; $("saveCloud").hidden = basic || !(curRecord && ownConnected()); $("endHome").hidden = basic;
+    $("saveRedo").hidden = basic || !(cfg && !cfg.sample); clearOnNextSetup = true;           // the next time the setup page opens it starts empty (name kept)
     show("end"); if (curRecord && cfg.saveResults && ownConnected()) sendRecord(curRecord); if (list.length) { burst(80); chime(); }
   }
   function burst(n) {
@@ -529,6 +530,7 @@
   function startQuiz(c, rounds) {
     cfg = c; quizLang = c.quizLang || "en"; ROUNDS = rounds; mode = c.mode || "group";
     bump("quizzes"); bump("questions", rounds.length); recordUsage(c, rounds.length);
+    if (!c.sample) { bump("participants", c.parts || 0); addLang(c.quizLangLabel || c.quizLang); }              // totals shown in the activity dashboard
     track("quiz_start", { questions: rounds.length, mode: mode, quiz_lang: quizLang });
     keepAwake(); noVoiceWarned = false;
     if (fsSupported() && !isFs()) enterFs();                  // full screen from the first question (the browser allows it right after the Start click)

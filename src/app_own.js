@@ -14,6 +14,7 @@
   }
   function toCsv(rows) { return "\uFEFF" + rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n"; }
   function downloadCsv(name, rows) {
+    if (/^obq-results/.test(name)) lsSet("qms.csvDone", true);
     return saveFile(name, new TextEncoder().encode(toCsv(rows)), "text/csv;charset=utf-8");
   }
   function resultsRows(records) {
@@ -170,7 +171,7 @@
     var r = document.createRange(), s = window.getSelection(); r.selectNodeContents($("guideRules")); s.removeAllRanges(); s.addRange(r);
     $("guideCopied").textContent = "Selected: press Ctrl+C (or long-press, Copy).";
   }
-  function openQmGuide() { show("qmguide"); }
+  function openQmGuide() { show("qmguide"); setUrl("instructions"); }
   function wireGuide() {
     $("goHelp").addEventListener("click", openQmGuide); $("qmGuideBtn").addEventListener("click", openQmGuide);
     $("qmBack").addEventListener("click", function () { paintDashboard(); show("dashboard"); }); $("qmBack2").addEventListener("click", function () { paintDashboard(); show("dashboard"); });
@@ -197,7 +198,7 @@
     $("histAll").addEventListener("click", function () { downloadCsv(csvName("obq-results-all", null), resultsRows(history())); });
     $("csvBtn").addEventListener("click", function () { if (curRecord) downloadCsv(csvName("obq-results", curRecord), resultsRows([curRecord])); });
     $("saveCloud").addEventListener("click", function () { if (curRecord) sendRecord(curRecord); });
-    $("goAdmin").addEventListener("click", function () { show("admin"); adminLoad(); });
+    $("goAdmin").addEventListener("click", function () { openAdmin(); });
     $("adminBack").addEventListener("click", goHomePage); $("adminRefresh").addEventListener("click", adminLoad);
     $("admUsageCsv").addEventListener("click", function () {
       downloadCsv("obq-usage-" + todayISO() + ".csv", [["Started", "Event", "Quiz Master", "Organisation", "Date", "Participants", "Quiz language", "Scope", "Books", "Mode", "Source", "Questions"]].concat(

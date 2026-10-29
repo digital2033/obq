@@ -1,6 +1,6 @@
 
   /* =====================================================================
-     BIBLE TEXT KNOWLEDGE BASE
+     BIBLE KNOWLEDGE BASE
      Reads USFM / USFX / USX / plain-text Bibles (single files or .zip), keeps them on this
      device (IndexedDB) and makes quiz questions from the verses.
      ===================================================================== */
@@ -383,7 +383,7 @@
     }).catch(function (e) { m.className = "err"; m.textContent = bbFail(e); });
   }
   function bbSizeLabel(s) { s = String(s || "").toUpperCase(); return s === "C" ? T("bbSizeC") : (s === "NT" ? T("bbSizeNT") : (s === "OT" ? T("bbSizeOT") : (s ? T("bbSizeP") + " (" + s + ")" : ""))); }
-  /* all text filesets found, and the ones that are shown: only text_usx and text_plain (the formats OBQ can read) */
+  /* all text filesets found, and the ones that are shown: only text_usx and text_usfm */
   function bbFilesetsOf(bibles) {
     var rows = [], seen = {}, all = 0, other = {};
     bibles.forEach(function (b) {
@@ -392,7 +392,7 @@
       list.forEach(function (f) {
         if (!f || !f.id || !/^text/i.test(f.type || "") || seen[f.id]) return;
         seen[f.id] = 1; all++;
-        if (/^text_(usx|plain)$/i.test(f.type)) rows.push({ id: f.id, type: f.type, size: f.size, bible: b.vname || b.name || b.abbr || "", abbr: b.abbr || "" });
+        if (/^text_(usx|usfm)$/i.test(f.type)) rows.push({ id: f.id, type: f.type, size: f.size, bible: b.vname || b.name || b.abbr || "", abbr: b.abbr || "" });
         else other[f.type] = (other[f.type] || 0) + 1;
       });
     });

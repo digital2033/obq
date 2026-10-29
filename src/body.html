@@ -8,14 +8,17 @@
     </div>
     <div class="tb-right" id="tbRight" hidden>
       <button class="ghost sm" id="exitFs" type="button" hidden data-i18n="exitFs"></button>
-      <button class="ghost sm" id="goHome" type="button" data-i18n="home"></button>
-      <button class="ghost sm" id="goHelp" type="button" data-i18n="helpBtn"></button>
-      <button class="ghost sm" id="goSettings" type="button" data-i18n="settingsBtn"></button>
-      <button class="ghost sm" id="goDash" type="button" data-i18n="dashBtn"></button>
-      <button class="ghost sm" id="goAdmin" type="button" hidden data-i18n="adminBtn"></button>
-      <select class="tb-lang" id="tbLang" aria-label="Language"></select>
-      <span class="uchip" id="uchip"></span>
-      <button class="ghost sm" id="signOutBtn" type="button" data-i18n="signOut"></button>
+      <a class="navlink" id="goHome" href="#" data-icon="house"><span class="nl" data-i18n="home"></span></a>
+      <a class="navlink" id="goHelp" href="#" data-icon="help"><span class="nl" data-i18n="helpBtn"></span></a>
+      <a class="navlink" id="goQuizzes" href="#" data-icon="star"><span class="nl" data-i18n="navQuizzes"></span></a>
+      <a class="navlink" id="goResults" href="#" data-icon="chart"><span class="nl" data-i18n="navResults"></span></a>
+      <a class="navlink" id="goDash" href="#" data-icon="tools"><span class="nl" data-i18n="dashBtn"></span></a>
+      <a class="navlink" id="goAdmin" href="#" data-icon="shield" hidden><span class="nl" data-i18n="adminBtn"></span></a>
+      <label class="tb-langwrap" data-icon="globe"><select class="tb-lang" id="tbLang" aria-label="Language"></select></label>
+      <a class="navlink" id="goSettings" href="#" data-icon="gear"><span class="nl" data-i18n="settingsBtn"></span></a>
+      <span class="uchip" id="uchip" data-icon="user"><span id="uname"></span></span>
+      <a class="navlink" id="goProfile" href="#" data-icon="id"><span class="nl" data-i18n="navProfile"></span></a>
+      <button class="navlink" id="signOutBtn" type="button" data-icon="logout"><span class="nl" data-i18n="signOut"></span></button>
     </div>
   </header>
 
@@ -31,6 +34,7 @@
       <div class="authform" id="formIn">
         <div class="field"><label for="inEmail" data-i18n="email"></label><input type="email" id="inEmail" autocomplete="email"></div>
         <div class="field"><label for="inPass" data-i18n="pass"></label><input type="password" id="inPass" autocomplete="current-password"></div>
+        <label class="check"><input type="checkbox" id="inRemember" checked><span data-i18n="rememberMe"></span></label>
         <button class="primary" type="button" id="btnIn" data-i18n="btnIn"></button>
         <button class="ghost" type="button" id="btnLink" hidden data-i18n="linkBtn"></button>
         <button class="link" type="button" id="forgotBtn" data-i18n="forgot"></button>
@@ -43,9 +47,16 @@
         <div class="field"><label for="upUsage" data-i18n="usage"></label><select id="upUsage"></select></div>
         <div class="field"><label for="upPass" data-i18n="pass"></label><input type="password" id="upPass" autocomplete="new-password"></div>
         <label class="check"><input type="checkbox" id="upTerms"><span><span data-i18n="termsAgree"></span> <button class="link" type="button" id="upTermsLink" data-i18n="termsRead"></button></span></label>
+        <label class="check"><input type="checkbox" id="upRemember" checked><span data-i18n="rememberMe"></span></label>
         <button class="primary" type="button" id="btnUp" data-i18n="btnUp"></button>
       </div>
       <button class="ghost" id="skipLogin" type="button" hidden data-i18n="skipLogin"></button>
+      <div class="authform" id="authOffline" hidden>
+        <h2 class="gh" data-i18n="fbDownTitle"></h2>
+        <p data-i18n="fbDown"></p>
+        <p class="note" data-i18n="fbDownHelp"></p>
+        <div class="row"><button class="primary" id="authRetry" type="button" data-i18n="fbRetry"></button><button class="ghost" id="authOfflineGo" type="button" data-i18n="fbOfflineGo"></button></div>
+      </div>
       <div class="authform" id="verifyBox" hidden>
         <h2 class="gh" data-i18n="verifyTitle"></h2>
         <p class="note" id="verifyMsg"></p>
@@ -78,6 +89,11 @@
   <!-- ================= HOME ================= -->
   <section class="screen" id="home">
     <div class="homewrap">
+      <div class="card announce" id="homeAnnounce" hidden>
+        <div class="annhead"><b id="annTitle"></b><span class="note" id="annDate"></span></div>
+        <p id="annText"></p>
+        <a id="annLink" target="_blank" rel="noopener" hidden></a>
+      </div>
       <div class="homegrid">
         <div class="card hero">
           <img class="herologo" id="homeLogo" alt="" hidden>
@@ -87,11 +103,15 @@
             <li data-i18n="homeA1"></li>
             <li data-i18n="homeA2"></li>
             <li data-i18n="homeA3"></li>
+            <li data-i18n="homeA4"></li>
           </ul>
           <p class="note" data-i18n="homeNew"></p>
+          <p class="note homeoffline" id="homeOffline" hidden></p>
+          <div class="homeinstall" id="homeInstall" hidden><p class="note" id="homeInstallText"></p><button class="primary sm" id="homeInstallBtn" type="button" hidden data-i18n="installBtn"></button></div>
         </div>
-        <div class="cards" id="homeCards"></div>
+        <div class="homemenu" id="homeCards"></div>
       </div>
+      <div class="card events" id="homeEvents"></div>
       <div class="card votd" id="votdBox">
         <h2 class="gh" data-i18n="votdTitle"></h2>
         <blockquote id="votdText"></blockquote>
@@ -101,14 +121,28 @@
     </div>
   </section>
 
+  <!-- ================= WELCOME (basic version: just your name) ================= -->
+  <section class="screen" id="welcome">
+    <img class="authlogo" id="welcomeLogo" alt="" hidden>
+    <div class="card narrow">
+      <h1 class="ptitle" data-i18n="welcomeTitle"></h1>
+      <p class="lead" data-i18n="welcomeText"></p>
+      <div class="field"><label for="wName" data-i18n="wName"></label><input type="text" id="wName" maxlength="60" autocomplete="name"></div>
+      <div class="field"><label for="wLang" data-i18n="uiLang"></label><select id="wLang"></select></div>
+      <div class="err" id="wErr" role="alert"></div>
+      <div class="row"><button class="primary" id="wGo" type="button" data-i18n="wGo"></button></div>
+    </div>
+  </section>
+
   <!-- ================= OBQ LITE ================= -->
   <section class="screen" id="lite">
     <div class="card">
       <h1 class="ptitle" data-i18n="liteTitle"></h1>
+      <p class="note" id="liteWho" hidden></p>
       <p class="note" data-i18n="liteIntro"></p>
       <div class="fgrid">
         <div class="field"><label for="lName" data-i18n="liteName"></label><input type="text" id="lName" maxlength="80" autocomplete="off"></div>
-        <div class="field"><label for="lLang" data-i18n="quizLang"></label><select id="lLang"></select></div>
+        <div class="field" id="lLangField"><label for="lLang" data-i18n="quizLang"></label><select id="lLang"></select></div>
         <div class="field" id="lOtherWrap" hidden><label for="lOther" data-i18n="langOtherLbl"></label><input type="text" id="lOther" maxlength="40" autocomplete="off"></div>
         <div class="field"><label for="lPart" data-i18n="liteScopeL"></label><select id="lPart"></select></div>
       </div>
@@ -138,6 +172,7 @@
       <h1 class="ptitle" data-i18n="setupTitle"></h1>
       <div class="panel2" id="savedBox" hidden>
         <h2 data-i18n="savedTitle"></h2>
+        <p class="note" id="savedEmpty" hidden data-i18n="ssEmpty"></p>
         <div class="okmsg" id="savedMsg" aria-live="polite"></div>
         <div class="okmsg" id="upcoming"></div>
         <div id="savedList"></div>
@@ -218,6 +253,22 @@
   <section class="screen" id="dashboard">
     <div class="card wide">
       <div class="dash-head"><h1 class="ptitle" data-i18n="dashTitle"></h1><div class="row"><button class="primary" id="qmGuideBtn" type="button" data-i18n="qmGuideBtn"></button><button class="ghost" id="dashBack" type="button" data-i18n="home"></button></div></div>
+
+      <nav class="jumpnav" aria-label="Quiz Builder">
+        <button class="ghost sm" type="button" data-jump="panelSetup" data-i18n="jSetup"></button>
+        <button class="ghost sm" type="button" data-jump="panelBank" data-i18n="jBank"></button>
+        <button class="ghost sm" type="button" data-jump="panelKb" data-i18n="jKb"></button>
+        <button class="ghost sm" type="button" data-jump="panelHist" data-i18n="jHist"></button>
+        <button class="ghost sm" type="button" data-jump="panelOwn" data-i18n="jOwn"></button>
+        <button class="ghost sm" type="button" data-jump="panelActivity" data-i18n="jAct"></button>
+        <button class="ghost sm" type="button" data-jump="panelRemote" data-i18n="jRemote"></button>
+      </nav>
+
+      <div class="panel2" id="panelSetup">
+        <h2 data-i18n="bSetupTitle"></h2>
+        <p class="note" data-i18n="bSetupText"></p>
+        <div class="row"><button class="primary" id="bSetupBtn" type="button" data-i18n="bSetupBtn"></button></div>
+      </div>
 
       <div class="panel2" id="panelBank">
         <h2 data-i18n="bankTitle"></h2>
@@ -335,10 +386,24 @@
         <div class="field"><label for="setSpeed" data-i18n="setSpeedL"></label><select id="setSpeed"></select></div>
         <label class="check"><input type="checkbox" id="setWake"><span data-i18n="setWakeL"></span></label>
       </div>
+      <div class="panel2" id="setInstall">
+        <h2 data-i18n="setInstallTitle"></h2>
+        <p id="setInstallState"></p>
+        <div class="row"><button class="primary" id="setInstallBtn" type="button" hidden data-i18n="installBtn"></button></div>
+        <p class="note" id="setInstallHelp"></p>
+        <p class="note" id="setOfflineState"></p>
+        <h3 class="gh2" data-i18n="offWorksTitle"></h3>
+        <ul class="steps"><li data-i18n="offWork1"></li><li data-i18n="offWork2"></li><li data-i18n="offWork3"></li><li data-i18n="offWork4"></li></ul>
+        <h3 class="gh2" data-i18n="offNeedsTitle"></h3>
+        <ul class="steps"><li data-i18n="offNeed1"></li><li data-i18n="offNeed2"></li><li data-i18n="offNeed3"></li><li data-i18n="offNeed4"></li></ul>
+        <p class="note" data-i18n="offNote"></p>
+      </div>
       <div class="panel2">
         <h2 data-i18n="setPrivacy"></h2>
         <label class="check"><input type="checkbox" id="setAnalytics"><span data-i18n="setAnalyticsL"></span></label>
         <p class="note" id="setAnalyticsNote"></p>
+        <p class="note" id="setDeviceInfo"></p>
+        <div class="row"><button class="ghost" id="setForget" type="button" data-i18n="setForget"></button></div>
         <p class="note" id="setTermsInfo"></p>
         <div class="row"><button class="ghost" id="setTermsBtn" type="button" data-i18n="termsRead"></button></div>
       </div>

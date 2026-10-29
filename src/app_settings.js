@@ -70,7 +70,35 @@
   function resetTermsBox(cb) { $(cb).checked = false; $(cb).removeAttribute("data-read"); }
 
   /* ---------- the Settings screen ---------- */
-  function openSettings() { paintSettings(); show("settings"); }
+  function openSettings(focusId) {
+    paintSettings(); show("settings"); var id = typeof focusId === "string" ? focusId : ""; setUrl(id === "setProfile" ? "profile" : "settings");
+    if (id) setTimeout(function () { var p = $(id); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+  }
+  /* ---------- install the app (PWA) and offline use ---------- */
+  var installEvt = null;
+  try {
+    window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEvt = e; paintInstall(); });
+    window.addEventListener("appinstalled", function () { installEvt = null; lsSet("qms.installed", true); paintInstall(); });
+  } catch (e) {}
+  function isStandalone() { try { return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true; } catch (e) { return false; } }
+  function isIOS() { var ua = navigator.userAgent || ""; return /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
+  function canBePwa() { return !!(document.querySelector('link[rel="manifest"]') && "serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")); }
+  function doInstall() {
+    if (!installEvt) return;
+    installEvt.prompt(); installEvt.userChoice.then(function (c) { if (c && c.outcome === "accepted") track("pwa_install", {}); installEvt = null; paintInstall(); }, function () {});
+  }
+  function paintInstall() {
+    var standalone = isStandalone(), can = canBePwa();
+    var state = $("setInstallState"), btn = $("setInstallBtn"), help = $("setInstallHelp"), off = $("setOfflineState");
+    state.textContent = standalone ? T("installedYes") : (can ? T("installedNo") : T("installNoPwa"));
+    btn.hidden = !installEvt || standalone; help.textContent = (standalone || installEvt || !can) ? "" : (isIOS() ? T("installIOS") : T("installOther"));
+    $("homeInstall").hidden = standalone || !can;                                              // the Home page invites to install (not when already installed)
+    $("homeInstallText").textContent = T("homeInstallText") + (!installEvt && isIOS() ? " " + T("installIOS") : "");
+    $("homeInstallBtn").hidden = !installEvt;
+    if (can && navigator.serviceWorker.getRegistration) {
+      navigator.serviceWorker.getRegistration().then(function (r) { off.textContent = (r && r.active) ? T("offReady") : T("offNotReady"); }, function () { off.textContent = T("offNotReady"); });
+    } else off.textContent = T("offSingle");
+  }
   function paintSettings() {
     var u = user || {};                                           // profile block: the current details
     $("setName").value = u.name || ""; $("setEmail").value = u.email || ""; $("setOrg").value = u.org || ""; $("setCountry").value = u.country || "";
@@ -90,8 +118,9 @@
     [["slow", "speedSlow"], ["normal", "speedNormal"], ["fast", "speedFast"]].forEach(function (f) { var o = el("option", null, T(f[1])); o.value = f[0]; sp.appendChild(o); }); sp.value = settings.speed;
     $("setAnalytics").checked = !(user && user.consent === false);
     $("setAnalyticsNote").textContent = fb.on ? T("setAnalyticsNote") : T("setAnalyticsLocal");
+    $("setDeviceInfo").textContent = (rememberPref() && sessGet()) ? T("setRememberedOn") : T("setRememberedOff");
     $("setTermsInfo").textContent = user && user.terms ? T("setTermsInfo", { v: user.terms }) : "";
-    $("setMsg").textContent = "";
+    $("setMsg").textContent = ""; paintInstall();
   }
   /* saves the profile: Firestore (and the sign-in display name) when online, the local account otherwise */
   function saveProfile() {
@@ -101,7 +130,7 @@
     if (!p.name || !p.org || !p.country || !p.usage) { msg.className = "err"; msg.textContent = T("errFill"); return; }
     var done = function () {
       user.name = p.name; user.org = p.org; user.country = p.country; user.usage = p.usage;
-      $("uchip").textContent = user.name + (user.org ? " - " + user.org : ""); btn.disabled = false; msg.className = "okmsg"; msg.textContent = T("setProfileOk");
+      $("uname").textContent = user.name; $("uchip").title = user.org || ""; btn.disabled = false; msg.className = "okmsg"; msg.textContent = T("setProfileOk");
       $("homeWelcome").textContent = T("homeWelcome", { name: user.name }); track("profile_update", {});
     };
     var fail = function () { btn.disabled = false; msg.className = "err"; msg.textContent = T("setProfileErr"); };
@@ -125,7 +154,8 @@
   function wireSettings() {
     $("setProfileSave").addEventListener("click", saveProfile);
     ["setName", "setOrg", "setCountry"].forEach(function (id) { $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); saveProfile(); } }); });
-    $("goSettings").addEventListener("click", openSettings); $("setHome").addEventListener("click", goHomePage);
+    $("goSettings").addEventListener("click", function () { openSettings(); }); $("setHome").addEventListener("click", goHomePage);
+    $("setInstallBtn").addEventListener("click", doInstall); $("homeInstallBtn").addEventListener("click", doInstall);
     Array.prototype.forEach.call(document.querySelectorAll("#settings [data-theme-set]"), function (b) {
       b.addEventListener("click", function () { settings.theme = b.getAttribute("data-theme-set"); saveSettings(); applyTheme(); paintSettings(); });
     });
@@ -134,6 +164,7 @@
     $("setWake").addEventListener("change", function () { settings.wake = $("setWake").checked; saveSettings(); });
     $("setSpeed").addEventListener("change", function () { settings.speed = $("setSpeed").value; saveSettings(); speakIn(trIn(langCodeOf(ui) || "en", "begin"), ui, true); });
     $("setAnalytics").addEventListener("change", function () { setAnalytics($("setAnalytics").checked); track("analytics_toggle", { on: $("setAnalytics").checked }); $("setMsg").textContent = $("setAnalytics").checked ? T("setAnalyticsOn") : T("setAnalyticsOff"); });
+    $("setForget").addEventListener("click", function () { forgetDevice(); signOut(); });
     $("setTermsBtn").addEventListener("click", function () { openTerms({ mode: "view" }); });
     $("setReset").addEventListener("click", function () { var k; for (k in SETTINGS_DEFAULT) settings[k] = SETTINGS_DEFAULT[k]; saveSettings(); applySettings(); paintSettings(); $("setMsg").textContent = T("setResetDone"); });
     $("termsBody").addEventListener("scroll", checkTermsScroll); window.addEventListener("resize", function () { if (!$("termsModal").hidden) checkTermsScroll(); });

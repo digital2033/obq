@@ -1,5 +1,49 @@
 # Changelog
 
+## v1.3.0 - top navigation, page addresses, install
+
+### Added
+- **Top bar with icons** in the order Home, Instructions, My Quizzes, Quiz Results, Quiz Builder, language chooser, Settings, user name, My Profile, Sign out. It adapts to its width (full labels, compact, icons only).
+- **Page addresses:** `/instructions`, `/settings`, `/profile`, `/my-quizzes`, `/results`, `/setup`, `/quick-quiz`, `/builder`, `/builder/questionbank`, `/builder/knowledge-base`, `/builder/results`, `/builder/firebase`, `/builder/activity`, `/builder/remote`. Direct links, bookmarks, reloads and the Back button work; an address opened before sign-in opens after it; Back never leaves a running quiz.
+- **Install the app (PWA):** an Install button on the Home page and in Settings (Chrome, Edge, Android), instructions for iPhone and other browsers, and a status line that says whether the app is ready for offline use. Manifest shortcuts for My Quizzes, Quiz Builder and Settings.
+- **Settings, Install and offline use:** what works without internet (quizzing, PDF and CSV, the timer, read aloud with an installed voice) and what needs internet (sending results to Firebase, cloud sync, Bible Brain downloads, usage counting).
+- **OBQ Quiz Builder** (renamed) starts with a **Set up a quiz** box. **Activity** now totals the participants from the quiz set-ups, counts the languages used, and shows the questions in the question bank (yours and the built-in bank) and the Bible texts and books in the knowledge base. The Home page shows the participants total too.
+
+### Changed
+- "Bible text knowledge base" is now **Bible Knowledge Base**.
+- The Bible Brain browser lists only **USX and USFM** filesets (it still says how many other text filesets, such as plain text, were found).
+
+## v1.2.0 - very basic version
+
+### Added
+- **Basic version** (`python tools/assemble.py --basic` makes `dist/obq-basic.html`): a separate single file with no login, no Home page, no Terms, no Settings and no Firebase. Type your name, set up an OBQ Lite quick quiz, run the event, download a PDF. Works offline from a saved file. The GitHub Action publishes it at `/basic/`.
+- The basic version's start page is translated into the 10 other interface languages (machine-prepared; please have them checked).
+
+### Fixed
+- The offline cache of the full app now ignores other pages on the same site (such as `/basic/`), so they can never replace the cached start page.
+
+## v1.1.0 - stay signed in, offline sign-in, new Home page
+
+### Added
+- **Remember me on this device** at sign-in and sign-up: stay signed in until you sign out. For online accounts a salted password hash and a profile copy are kept on that device so the same email and password work **without internet** (the first sign-in still needs internet). **Forget this device** in Settings removes it.
+- A remembered device starts without internet straight into the app, with a note that online features are paused.
+- **Home page:** the menu is grouped into Run a quiz, one **Quiz Builder** box (Question Bank, Bible Text Knowledge Base, Quiz Results, Activity Dashboard, My Firebase Backup) and Account and help; a **Your events** panel (upcoming scheduled events with Start now, recent quizzes, numbers, a Getting started checklist and a daily tip); an optional **announcement** banner for an event or campaign.
+- **Quiz Builder** has a jump bar to its sections.
+
+### Changed
+- If the profile cannot be loaded online, the copy saved on the device is used.
+- Instructions for Quiz Masters and the README explain offline use.
+
+## v1.0.1 - sign-in and Terms fixes
+
+### Fixed
+- **Sign-in after restarting the browser or computer:** if the page is set up for online accounts but the online sign-in service could not be reached in time (for example no network yet, or a blocker), the app used to switch silently to local accounts, where the online account does not exist, and showed "Email or password is incorrect". It now shows a clear box ("Cannot reach the online sign-in service") with **Try again** and **Continue offline**, retries by itself when the connection returns, waits longer and retries each library file once. The Firebase library is also cached for offline use.
+- **Clearer messages:** local mode now says when no account with that email exists in this browser (and why), online mode explains accounts made in local mode or on another address, and the login page always shows which mode is active.
+- The browser is asked to keep the site's data (so local accounts are less likely to be cleared).
+
+### Changed
+- **Terms and Conditions are accepted once, at sign-up.** Existing accounts are no longer asked to accept again at sign-in. (Optional: set `reacceptTerms: true` in `src/cfg1.js` to ask again whenever `termsVersion` changes.) Section 9 of the Terms was reworded accordingly.
+
 ## v1.0.0 - Oral Bible Quiz (OBQ), first public release
 
 A web app for leading live Bible quizzes for groups who learn by listening. It is one installable page that also works offline, with 11 interface languages.

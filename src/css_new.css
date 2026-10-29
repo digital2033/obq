@@ -133,3 +133,66 @@
   #settings select { max-width: 360px; }
   .timer { flex-wrap: wrap; }
   #termsIntro:empty { display: none; }
+  /* ---- Home: menu groups, events, announcement ---- */
+  .homemenu { display: flex; flex-direction: column; gap: 14px; }
+  .hgroup { display: flex; flex-direction: column; gap: 8px; }
+  .hgroup .gtitle { margin: 0; color: var(--muted); font-size: .78em; letter-spacing: .09em; text-transform: uppercase; font-weight: 800; }
+  .hgroup .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hgroup.box { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 12px; gap: 6px; border-inline-start: 5px solid var(--sun); }
+  .hgroup.box .boxhead { display: flex; align-items: flex-start; gap: 12px; text-align: start; background: transparent; border: 0; color: var(--ink); padding: 4px 4px 8px; }
+  .hgroup.box .boxhead svg { flex: none; width: 26px; height: 26px; color: var(--sun); margin-top: 2px; }
+  .hgroup.box .boxhead .ct { font-weight: 800; font-size: 1.05em; }
+  .hgroup.box .boxhead .cd { color: var(--muted); font-size: .82em; }
+  .hgroup.box .hrow { display: flex; align-items: center; gap: 10px; text-align: start; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; color: var(--ink); font-weight: 700; }
+  .hgroup.box .hrow:hover, .hgroup.box .hrow:focus-visible { border-color: var(--sun); }
+  .hgroup.box .hrow svg { flex: none; width: 20px; height: 20px; color: var(--sun); }
+  .hgroup.box .hrow .cd { margin-inline-start: auto; color: var(--muted); font-weight: 400; font-size: .8em; text-align: end; }
+  @media (max-width: 560px) { .hgroup .cards { grid-template-columns: 1fr; } .hgroup.box .hrow .cd { display: none; } }
+  .announce { max-width: none; margin: 0; background: linear-gradient(120deg, var(--panel-hi), var(--panel)); border-inline-start: 6px solid var(--sun); }
+  .announce .annhead { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .announce .annhead b { font-size: 1.15em; color: var(--sun); }
+  .announce p { margin: 0; line-height: 1.6; }
+  .announce a { color: var(--sun); font-weight: 800; }
+  .homeoffline { color: var(--sun); font-weight: 700; }
+  .events { max-width: none; margin: 0; }
+  .events .evgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 900px) { .events .evgrid { grid-template-columns: 1fr; } }
+  .events h3 { margin: 0 0 8px; font-size: .95em; color: var(--sun); }
+  .events .evitem { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .events .evitem b { display: block; }
+  .events .evitem .note { display: block; margin: 2px 0 6px; }
+  .events .evitem .when { color: var(--sun); font-weight: 800; font-size: .85em; }
+  .events .evbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .events .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .events .tile { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .events .tile b { font-size: 1.5em; color: var(--sun); display: block; }
+  .events .tile span { color: var(--muted); font-size: .8em; }
+  .events .checklist { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .events .checklist .ck { display: inline-flex; gap: 6px; align-items: center; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: .88em; }
+  .events .checklist .ck.done { opacity: .6; text-decoration: line-through; }
+  .events .tip { margin: 12px 0 0; color: var(--muted); }
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 8px; position: sticky; top: 0; z-index: 5; background: var(--panel); padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .hgroup.box .boxhead .ctext { display: flex; flex-direction: column; gap: 2px; }
+  .hgroup.box .hrow .rt { flex: none; white-space: nowrap; }
+  .hgroup.box .hrow .cd { min-width: 0; }
+  /* ---- top navigation with icons ---- */
+  .tb-right { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; }
+  .navlink { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--ink); text-decoration: none; font-weight: 700; font-size: .85em; cursor: pointer; line-height: 1.2; }
+  .navlink[hidden] { display: none !important; }
+  .navlink:hover, .navlink:focus-visible { border-color: var(--sun); }
+  .navlink[aria-current="page"] { border-color: var(--sun); color: var(--sun); }
+  .navlink svg, .uchip svg, .tb-langwrap svg { flex: none; width: 16px; height: 16px; }
+  .tb-langwrap { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); }
+  .uchip { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 700; font-size: .85em; padding: 0 4px; }
+  .uchip #uname { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar { container-type: inline-size; container-name: topbar; }
+  /* the bar adapts to its own width: full labels, then compact, then icons only */
+  @container topbar (max-width: 1559px) { .navlink { padding: 6px 9px; font-size: .8em; gap: 5px; } .tb-right { gap: 4px; } .tb-lang { max-width: 108px; padding: 5px 8px; font-size: .8em; } .uchip { font-size: .8em; } .uchip #uname { max-width: 12ch; }
+    #goProfile .nl, #goResults .nl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+  @container topbar (max-width: 1339px) { .navlink .nl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .navlink { padding: 8px 10px; } .uchip #uname { max-width: 9ch; } }
+  @supports not (container-type: inline-size) {
+    @media (max-width: 1700px) { .navlink { padding: 6px 9px; font-size: .8em; } .tb-lang { max-width: 108px; } }
+    @media (max-width: 1500px) { .navlink .nl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+  }
+  .homeinstall { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .homeinstall p { margin: 0; }

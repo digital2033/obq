@@ -29,7 +29,7 @@ Object.assign(QUIZ_I18N.en, {
   srcKB: "Questions generated from my Bible text", kbQ1: "Complete the verse:", kbQ2: "Which book is this verse from?",
   errNoKb: "No Bible text for this language yet. Add it in the Quiz Builder.", kbAvail: "Bible text found for {n} book(s) in this scope.",
   kbNone: "No Bible text found for this scope and language. Add it in the Quiz Builder.", kbInfoN: "{n} Bible text(s) added", kbEmpty: "No Bible text added yet.",
-  kbTitle: "Bible text knowledge base",
+  kbTitle: "Bible Knowledge Base",
   kbIntro: "Add Bible text so the app can make questions from it in any language. Upload USFM, USFX, USX or plain-text files (or a zip of them), or download a fileset from Bible Brain with your API key and fileset ID. The text stays on this device.",
   kbLang: "Language of this Bible text", kbName: "Version name (optional)", kbFiles: "Upload Bible text files", kbFs: "Bible Brain fileset ID", kbKey: "Bible Brain API key",
   kbKeyNote: "The key is only used to fetch the files and is not saved.", kbDl: "Download from Bible Brain", kbBusy: "Reading files...", kbProg: "Downloading {a} of {b}...",
@@ -127,7 +127,7 @@ Object.assign(QUIZ_I18N.en, {
 /* Bible Brain: country and language lists, text filesets */
 Object.assign(QUIZ_I18N.en, {
   bbTitle: "Bible Brain (optional)",
-  bbIntro: "Enter your Bible Brain API key, load the lists, then choose a country and a language. The text filesets Bible Brain offers for that language appear below: press Download to add one to your knowledge base.",
+  bbIntro: "Enter your Bible Brain API key, load the lists, then choose a country and a language. The USX and USFM filesets Bible Brain offers for that language appear below: press Download to add one to your knowledge base.",
   bbLoad: "Load countries and languages", bbCountry: "Country", bbLangL: "Language", bbPickCountry: "Choose a country", bbPickLang: "Choose a language",
   bbLoading: "Loading from Bible Brain...", bbCountries: "{n} countries loaded.", bbLangsN: "{n} languages in this country.", bbNoLangs: "Bible Brain lists no languages for this country.",
   bbNone: "No text filesets were found for this language. Try another language, or enter a fileset ID below.", bbFound: "{n} text filesets found for {lang}.",
@@ -153,7 +153,7 @@ Object.assign(QUIZ_I18N.en, {
   hSaved: "My saved quizzes", hSavedD: "Redo a saved quiz or start from a template.",
   hBuilder: "Quiz Builder", hBuilderD: "All your tools in one place.",
   hBank: "Question Bank", hBankD: "Download the Excel template and upload your own questions.",
-  hKb: "Bible Text Knowledge Base", hKbD: "Add Bible text (USFM, USX or Bible Brain) and make questions from it.",
+  hKb: "Bible Knowledge Base", hKbD: "Add Bible text (USFM, USX or Bible Brain) and make questions from it.",
   hResults: "Quiz Results", hResultsD: "Download or send the results of finished quizzes.",
   hActivity: "Activity Dashboard", hActivityD: "See how many quizzes and questions you have run.",
   hOwn: "My Firebase Backup", hOwnD: "Optional: send your results to your own Firebase.",
@@ -169,8 +169,8 @@ Object.keys(MORE2).forEach(function (k) { QUIZ_I18N[k].scMore2 = MORE2[k]; });
 QUIZ_I18N.en.styleNormalD = "The full mix of various kinds of question: regular, multiple choice, 50:50, hints, Who am I, trivia, multi-part and difficult.";
 
 Object.assign(QUIZ_I18N.en, {
-  bbFoundN: "{all} text filesets found for {lang}. {shown} shown (USX or plain-text format).", bbOthers: "Not shown: {list}.",
-  bbNoneShown: "{all} text filesets were found for {lang}, but none is in USX or plain-text format. Types found: {list}."
+  bbFoundN: "{all} text filesets found for {lang}. {shown} shown (USX or USFM format).", bbOthers: "Not shown: {list}.",
+  bbNoneShown: "{all} text filesets were found for {lang}, but none is in USX or USFM format. Types found: {list}."
 });
 
 /* read aloud */
@@ -226,4 +226,91 @@ Object.assign(QUIZ_I18N.en, {
   setProfile: "Your profile", setProfileSave: "Update profile", setProfileOk: "Your profile was updated.",
   setProfileErr: "Could not update your profile. Check your internet connection and try again.",
   setEmailNote: "Your email address is your sign-in and cannot be changed here. To change it, contact the administrators."
+});
+
+/* clearer sign-in messages */
+Object.assign(QUIZ_I18N.en, {
+  localNote: "Local mode: accounts are kept in this browser only, for this website address. Clearing the browser's data, or using another browser, device or web address, means the account will not be found.",
+  onlineNote: "Online accounts: you can sign in from any device with the same email address.",
+  errNoLocal: "No account with this email was found in this browser. Local-mode accounts exist only in the browser and website address where they were created. Create a new account here, or use the browser and address you signed up on.",
+  errNoOnline: "No online account with this email exists yet. Create an account first.",
+  errCredsOnline: "The email or password is not correct. If you created your account in local mode, on another website address, or before this site was connected online, that account does not exist here: create an account, or use \"Forgot password\" or \"Email me a sign-in link\"."
+});
+
+/* online sign-in service not reachable */
+Object.assign(QUIZ_I18N.en, {
+  fbDownTitle: "Cannot reach the online sign-in service",
+  fbDown: "This app uses online accounts, but the connection to the sign-in service could not be made. Your account has not been lost.",
+  fbDownHelp: "Check that you are connected to the internet (it can take a moment after starting a computer), and that no ad blocker, privacy extension or firewall blocks www.gstatic.com or googleapis.com. This page tries again by itself when the connection returns. \"Continue offline\" uses a separate local account on this device, which is not your online account.",
+  fbRetry: "Try again", fbOfflineGo: "Continue offline (local account)"
+});
+
+/* Remember me, offline, Home groups and events, Builder navigation */
+Object.assign(QUIZ_I18N.en, {
+  rememberMe: "Remember me on this device: stay signed in until I sign out, and sign in again without internet. (Do not tick this on a shared computer.)",
+  homeOffline: "You are working offline with the sign-in saved on this device. Online features (cloud sync, Bible Brain downloads, usage counting) work again when you open the app with internet.",
+  setRememberedOn: "This device is remembered: you stay signed in until you sign out, and your email and password also work without internet.",
+  setRememberedOff: "This device is not remembered: you will be asked to sign in again when the browser is closed.",
+  setForget: "Forget this device (sign out and remove the saved sign-in)",
+  hGroupRun: "Run a quiz", hGroupMore: "Account and help", hBuilderD: "All your question and results tools in one box.",
+  jBank: "Question bank", jKb: "Bible Knowledge Base", jHist: "Results", jOwn: "My Firebase", jAct: "Activity", jRemote: "Remote test",
+  evTitle: "Your events", evUpcoming: "Upcoming events", evNoUpcoming: "No event is planned. Set up a quiz and save it as a scheduled event.", evPlan: "Plan an event",
+  evRecent: "Recent quizzes", evNoRecent: "No finished quiz yet.", evAll: "All results", evGlance: "At a glance",
+  evToday: "today", evTomorrow: "tomorrow", evIn: "in {n} days", evLine: "{p} participants - {lang} - {n} questions", evWinners: "Winner: {w}", evNames: "{n} on the points list",
+  ckTitle: "Getting started:", ck1: "Try the Demo Contest", ck2: "Add your own questions or Bible text", ck3: "Run your first quiz", ck4: "Save the results as PDF or CSV",
+  tipLabel: "Tip:",
+  tip1: "Read each question twice, slowly, and read the options as A, B, C, D.",
+  tip2: "With a presentation remote, one button does Show answer, Give points and Next.",
+  tip3: "Save an event as a template or scheduled event, then press Start now on the day.",
+  tip4: "Use the Simple style the first time you lead a group, or when children take part.",
+  tip5: "Press F for full screen and R to read a question aloud.",
+  tip6: "Add Bible text in your language to make questions in that language.",
+  tip7: "Type each name once; tick it from the list for the next questions.",
+  tip8: "After a quiz, press Save this quiz to redo later to run the same questions again.",
+  tip9: "Turn on Read aloud and use Test voice to pick a voice in your language.",
+  tip10: "Check your sound and projector before the event with the Demo Contest.",
+  tip11: "Download the results as CSV to keep a record in a spreadsheet.",
+  tip12: "Choose a larger text size in Settings for a big room."
+});
+
+/* the very basic version */
+Object.assign(QUIZ_I18N.en, {
+  welcomeTitle: "Oral Bible Quiz", welcomeText: "A simple way to lead a Bible quiz for a group. Type your name, choose your quiz and start.",
+  wName: "Your name", wGo: "Continue", errName: "Please type your name.", basicChange: "Change name"
+});
+Object.assign(QUIZ_I18N.en, { liteWho: "Quiz Master: {name}" });
+/* the basic version's start page in the other interface languages (machine-prepared: please have a native speaker check) */
+var BASIC_TXT = {
+  hi: { welcomeText: "समूह के लिए बाइबल क्विज़ चलाने का एक सरल तरीका। अपना नाम लिखें, क्विज़ चुनें और शुरू करें।", wName: "आपका नाम", wGo: "आगे बढ़ें", errName: "कृपया अपना नाम लिखें।", basicChange: "नाम बदलें", liteWho: "क्विज़ मास्टर: {name}" },
+  ml: { welcomeText: "ഒരു ഗ്രൂപ്പിനായി ബൈബിൾ ക്വിസ് നയിക്കാനുള്ള ലളിതമായ മാർഗം. നിങ്ങളുടെ പേര് ടൈപ്പ് ചെയ്യുക, ക്വിസ് തിരഞ്ഞെടുക്കുക, തുടങ്ങുക.", wName: "നിങ്ങളുടെ പേര്", wGo: "തുടരുക", errName: "ദയവായി നിങ്ങളുടെ പേര് ടൈപ്പ് ചെയ്യുക.", basicChange: "പേര് മാറ്റുക", liteWho: "ക്വിസ് മാസ്റ്റർ: {name}" },
+  ta: { welcomeText: "ஒரு குழுவுக்கு பைபிள் வினாடி வினாவை நடத்த எளிய வழி. உங்கள் பெயரை உள்ளிட்டு, வினாடி வினாவைத் தேர்ந்தெடுத்து தொடங்குங்கள்.", wName: "உங்கள் பெயர்", wGo: "தொடரவும்", errName: "உங்கள் பெயரை உள்ளிடவும்.", basicChange: "பெயரை மாற்று", liteWho: "வினாடி வினா நடத்துநர்: {name}" },
+  te: { welcomeText: "సమూహం కోసం బైబిల్ క్విజ్ నిర్వహించడానికి సులభమైన మార్గం. మీ పేరు టైప్ చేసి, క్విజ్‌ను ఎంచుకుని ప్రారంభించండి.", wName: "మీ పేరు", wGo: "కొనసాగించండి", errName: "దయచేసి మీ పేరు టైప్ చేయండి.", basicChange: "పేరు మార్చండి", liteWho: "క్విజ్ మాస్టర్: {name}" },
+  bn: { welcomeText: "একটি দলের জন্য বাইবেল কুইজ পরিচালনার সহজ উপায়। আপনার নাম লিখুন, কুইজ বেছে নিন এবং শুরু করুন।", wName: "আপনার নাম", wGo: "চালিয়ে যান", errName: "অনুগ্রহ করে আপনার নাম লিখুন।", basicChange: "নাম পরিবর্তন", liteWho: "কুইজ মাস্টার: {name}" },
+  mr: { welcomeText: "गटासाठी बायबल प्रश्नमंजुषा चालवण्याचा सोपा मार्ग. तुमचे नाव लिहा, प्रश्नमंजुषा निवडा आणि सुरू करा.", wName: "तुमचे नाव", wGo: "पुढे जा", errName: "कृपया तुमचे नाव लिहा.", basicChange: "नाव बदला", liteWho: "प्रश्नमंजुषा संचालक: {name}" },
+  ne: { welcomeText: "समूहका लागि बाइबल क्विज सञ्चालन गर्ने सरल तरिका। आफ्नो नाम लेख्नुहोस्, क्विज छान्नुहोस् र सुरु गर्नुहोस्।", wName: "तपाईंको नाम", wGo: "जारी राख्नुहोस्", errName: "कृपया आफ्नो नाम लेख्नुहोस्।", basicChange: "नाम परिवर्तन", liteWho: "क्विज सञ्चालक: {name}" },
+  ur: { welcomeText: "ایک گروپ کے لیے بائبل کوئز چلانے کا آسان طریقہ۔ اپنا نام لکھیں، کوئز منتخب کریں اور شروع کریں۔", wName: "آپ کا نام", wGo: "جاری رکھیں", errName: "براہ کرم اپنا نام لکھیں۔", basicChange: "نام تبدیل کریں", liteWho: "کوئز ماسٹر: {name}" },
+  pa: { welcomeText: "ਗਰੁੱਪ ਲਈ ਬਾਈਬਲ ਕੁਇਜ਼ ਚਲਾਉਣ ਦਾ ਸੌਖਾ ਤਰੀਕਾ। ਆਪਣਾ ਨਾਮ ਲਿਖੋ, ਕੁਇਜ਼ ਚੁਣੋ ਅਤੇ ਸ਼ੁਰੂ ਕਰੋ।", wName: "ਤੁਹਾਡਾ ਨਾਮ", wGo: "ਜਾਰੀ ਰੱਖੋ", errName: "ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਨਾਮ ਲਿਖੋ।", basicChange: "ਨਾਮ ਬਦਲੋ", liteWho: "ਕੁਇਜ਼ ਮਾਸਟਰ: {name}" },
+  or: { welcomeText: "ଏକ ଗୋଷ୍ଠୀ ପାଇଁ ବାଇବଲ କୁଇଜ୍ ପରିଚାଳନା କରିବାର ସରଳ ଉପାୟ। ଆପଣଙ୍କ ନାମ ଲେଖନ୍ତୁ, କୁଇଜ୍ ବାଛନ୍ତୁ ଏବଂ ଆରମ୍ଭ କରନ୍ତୁ।", wName: "ଆପଣଙ୍କ ନାମ", wGo: "ଜାରି ରଖନ୍ତୁ", errName: "ଦୟାକରି ଆପଣଙ୍କ ନାମ ଲେଖନ୍ତୁ।", basicChange: "ନାମ ବଦଳାନ୍ତୁ", liteWho: "କୁଇଜ୍ ମାଷ୍ଟର: {name}" }
+};
+Object.keys(BASIC_TXT).forEach(function (k) { Object.keys(BASIC_TXT[k]).forEach(function (key) { QUIZ_I18N[k][key] = BASIC_TXT[k][key]; }); });
+
+/* navigation, builder, activity totals, install and offline */
+Object.assign(QUIZ_I18N.en, {
+  navQuizzes: "My Quizzes", navResults: "Quiz Results", navProfile: "My Profile",
+  bSetupTitle: "Set up a quiz", bSetupText: "Start here. Choose the language, the books, the quiz style and the questions, then run your quiz. You can save a set-up to use again from My Quizzes.", bSetupBtn: "Set up your quiz", jSetup: "Set up a quiz",
+  ssEmpty: "No saved quizzes yet. Set up a quiz and choose Save for later.",
+  aParts: "Participants (from the quiz set-ups)", aLangs: "Languages used", aBankMine: "Questions in my question bank", aBankBuilt: "Built-in questions",
+  aKbTexts: "Bible texts in my knowledge base", aKbBooks: "Bible books stored in them", aLangList: "Quiz languages used: {list}",
+  homeA4: "Install it on your phone or computer and it runs offline.",
+  homeInstallText: "Install OBQ on this device: it then opens like an app and runs offline.", installBtn: "Install OBQ on this device",
+  setInstallTitle: "Install and offline use",
+  installedYes: "OBQ is installed on this device. It opens like an app and runs offline.",
+  installedNo: "OBQ can be installed on this device, so that it opens like an app and runs offline.",
+  installIOS: "On an iPhone or iPad: tap the Share button in Safari, then Add to Home Screen.",
+  installOther: "In Chrome or Edge: use the Install icon in the address bar, or the browser menu, then Install app. On Android: menu, then Install app or Add to Home Screen.",
+  installNoPwa: "This copy of the app is a single page and cannot be installed. Open the hosted version of OBQ to install it, or save the page on your device to use it offline.",
+  offReady: "Offline: ready. The app is saved on this device and opens without internet.", offNotReady: "Offline: not ready yet. Open the app once with internet and wait a moment.", offSingle: "Offline: a saved copy of this single page works without internet.",
+  offWorksTitle: "What works without internet", offWork1: "Quizzing", offWork2: "PDF and CSV", offWork3: "The timer", offWork4: "Read aloud (with an installed voice)",
+  offNeedsTitle: "What still needs internet", offNeed1: "Sending results to your Firebase", offNeed2: "Cloud sync", offNeed3: "Bible Brain downloads", offNeed4: "Usage counting",
+  offNote: "The app must be installed or opened once online first."
 });
