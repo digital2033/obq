@@ -531,7 +531,7 @@
 
   /* ---------- dashboard ---------- */
   var CAT_KEYS = { one: "catOne", mc: "catMC", oneword: "catWord", clue: "catClue", multi: "catMulti" };
-  function paintDashboard() {
+  function paintBuilder() {
     var box = $("bankStats"), tb = $("bankTable"); clear(box); clear(tb);
     $("clearBank").disabled = !bank.length;
     if (!bank.length) { box.appendChild(el("p", "note", T("bankEmpty"))); }
@@ -550,6 +550,11 @@
         tb.appendChild(tr);
       });
     }
+    paintKb();
+  }
+  /* the pages that used to be part of the Quiz Builder */
+  function paintResults() { paintOwn(); }                         // my quiz results + my Firebase (on the Quiz Results page)
+  function paintAnalytics() {
     Array.prototype.forEach.call(document.querySelectorAll("#panelActivity .langlist"), function (n) { n.remove(); });
     var st = stats(), sb = $("stats"); clear(sb);
     var hist = history(), names = hist.reduce(function (n, r) { return n + (r.resultsCount || 0); }, 0);
@@ -560,5 +565,5 @@
     });
     if (langs.length) { var ln = el("p", "note", T("aLangList", { list: langs.join(", ") })); sb.parentNode.insertBefore(ln, sb.nextSibling); ln.className = "note langlist"; }
     $("fbStatus").textContent = fb.on ? T("fbOn") : T("fbOff");
-    $("remoteOut").textContent = "-"; paintKb(); paintOwn();
   }
+  function paintDashboard() { paintBuilder(); paintResults(); paintAnalytics(); }

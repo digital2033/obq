@@ -15,6 +15,8 @@
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/>',
     shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
     star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+    left: '<path d="M15 5l-7 7 7 7"/>',
     house: '<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
@@ -41,8 +43,13 @@
     if (!n) { $("wErr").textContent = T("errName"); return; }
     lsSet("qms.basicName", n); user = { email: "", name: n, org: "", country: "", usage: "", consent: false, terms: S.termsVersion }; openLite();
   }
+  function openResults(panelId) {                                  // the Quiz Results page: my quiz results and my Firebase backup
+    paintResults(); show("resultsPage"); setUrl(panelId === "panelOwn" ? "results/firebase" : "results");
+    if (panelId) setTimeout(function () { var p = $(panelId); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+  }
+  function openAnalytics() { paintAnalytics(); show("analytics"); setUrl("analytics"); }
   function openBuilder(panelId) {
-    paintDashboard(); show("dashboard"); setUrl(PANEL_ROUTE[panelId] || "builder");
+    paintBuilder(); show("dashboard"); setUrl(PANEL_ROUTE[panelId] || "builder");
     if (panelId) setTimeout(function () { var p = $(panelId); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   }
   function openAdmin() { show("admin"); adminLoad(); setUrl("admin"); }
@@ -55,23 +62,24 @@
 
   /* ---------- Home menu: "Run a quiz", one "Quiz Builder" box with all its tools, and "Account and help" ---------- */
   var HOME_ITEMS = {
-    setup:    { icon: "sliders", t: "hSetup",    d: "hSetupD",    lite: false, go: goSetup },
-    lite:     { icon: "bolt",    t: "hLite",     d: "hLiteD",     lite: true,  go: function () { openLite(); } },
-    demo:     { icon: "trophy",  t: "hDemo",     d: "hDemoD",     lite: true,  go: function () { runDemo(); } },
-    saved:    { icon: "star",    t: "hSaved",    d: "hSavedD",    lite: false, go: openSaved },
-    bank:     { icon: "book",    t: "hBank",     d: "hBankD",     lite: false, go: function () { openBuilder("panelBank"); } },
-    kb:       { icon: "text",    t: "hKb",       d: "hKbD",       lite: false, go: function () { openBuilder("panelKb"); } },
-    results:  { icon: "chart",   t: "hResults",  d: "hResultsD",  lite: false, go: function () { openBuilder("panelHist"); } },
-    activity: { icon: "pulse",   t: "hActivity", d: "hActivityD", lite: false, go: function () { openBuilder("panelActivity"); } },
-    firebase: { icon: "cloud",   t: "hOwn",      d: "hOwnD",      lite: false, go: function () { openBuilder("panelOwn"); } },
-    settings: { icon: "gear",    t: "hSettings", d: "hSettingsD", lite: true,  go: function () { openSettings(); } },
-    help:     { icon: "help",    t: "hHelp",     d: "hHelpD",     lite: true,  go: function () { openQmGuide(); } },
-    admin:    { icon: "shield",  t: "hAdmin",    d: "hAdminD",    lite: false, adminOnly: true, go: openAdmin }
+    lite:      { icon: "bolt",    t: "hLite",      d: "hLiteD",      lite: true,  go: function () { openLite(); } },
+    demo:      { icon: "trophy",  t: "hDemo",      d: "hDemoD",      lite: true,  go: function () { runDemo(); } },
+    setup:     { icon: "sliders", t: "hSetup",     d: "hSetupD",     lite: false, go: goSetup },
+    saved:     { icon: "star",    t: "hSaved",     d: "hSavedD",     lite: false, go: openSaved },
+    bank:      { icon: "book",    t: "hBank",      d: "hBankD",      lite: false, go: function () { openBuilder("panelBank"); } },
+    kb:        { icon: "text",    t: "hKb",        d: "hKbD",        lite: false, go: function () { openBuilder("panelKb"); } },
+    results:   { icon: "chart",   t: "hResults",   d: "hResultsD",   lite: false, go: function () { openResults(); } },
+    analytics: { icon: "pulse",   t: "hAnalytics", d: "hAnalyticsD", lite: false, go: function () { openAnalytics(); } },
+    firebase:  { icon: "cloud",   t: "hOwn",       d: "hOwnD",       lite: false, go: function () { openResults("panelOwn"); } },
+    settings:  { icon: "gear",    t: "hSettings",  d: "hSettingsD",  lite: true,  go: function () { openSettings(); } },
+    help:      { icon: "help",    t: "hHelp",      d: "hHelpD",      lite: true,  go: function () { openQmGuide(); } },
+    admin:     { icon: "shield",  t: "hAdmin",     d: "hAdminD",     lite: false, adminOnly: true, go: openAdmin }
   };
   var HOME_GROUPS = [
-    { id: "run",     title: "hGroupRun",  items: ["setup", "lite", "demo", "saved"] },
-    { id: "builder", title: "hBuilder",   desc: "hBuilderD", box: true, items: ["bank", "kb", "results", "activity", "firebase"] },
-    { id: "more",    title: "hGroupMore", items: ["settings", "help", "admin"] }
+    { id: "run",     title: "hGroupRun",  items: ["lite", "demo", "setup", "saved"] },
+    { id: "builder", title: "hBuilder",   desc: "hBuilderD", box: true, head: "builder", icon: "tools", headGo: function () { openBuilder(""); }, items: ["bank", "kb"] },
+    { id: "results", title: "hGroupResults", desc: "hGroupResultsD", box: true, head: "resultshead", icon: "chart", headGo: function () { openResults(); }, items: ["results", "firebase"] },
+    { id: "more",    title: "hGroupMore", items: ["analytics", "settings", "help", "admin"] }
   ];
   function homeItemOK(id, li) { var it = HOME_ITEMS[id]; return !((li && !it.lite) || (it.adminOnly && !isAdmin)); }
   function paintHomeMenu() {
@@ -80,9 +88,9 @@
       var ids = g.items.filter(function (id) { return homeItemOK(id, li); }); if (!ids.length) return;
       var sec = el("section", "hgroup" + (g.box ? " box" : "")); sec.setAttribute("data-group", g.id);
       if (g.box) {                                                          // all Quiz Builder tools in one box; its heading opens the Builder
-        var head = el("button", "boxhead"); head.type = "button"; head.setAttribute("data-card", "builder"); head.insertAdjacentHTML("beforeend", icon("tools"));
+        var head = el("button", "boxhead"); head.type = "button"; head.setAttribute("data-card", g.head); head.insertAdjacentHTML("beforeend", icon(g.icon));
         var tx = el("span", "ctext"); tx.appendChild(el("span", "ct", T(g.title))); tx.appendChild(el("span", "cd", T(g.desc))); head.appendChild(tx);
-        head.addEventListener("click", function () { openBuilder(""); }); sec.appendChild(head);
+        head.addEventListener("click", g.headGo); sec.appendChild(head);
         ids.forEach(function (id) {
           var it = HOME_ITEMS[id], r = el("button", "hrow"); r.type = "button"; r.setAttribute("data-card", id); r.insertAdjacentHTML("beforeend", icon(it.icon));
           r.appendChild(el("span", "rt", T(it.t))); r.appendChild(el("span", "cd", T(it.d))); r.addEventListener("click", it.go); sec.appendChild(r);
@@ -141,7 +149,7 @@
       row.appendChild(el("span", "note", (r.winners && r.winners.length ? T("evWinners", { w: r.winners.slice(0, 2).join(", ") }) + " - " : "") + T("evNames", { n: r.resultsCount || 0 })));
       c2.appendChild(row);
     });
-    if (hist.length) { var all = el("button", "ghost sm", T("evAll")); all.type = "button"; all.addEventListener("click", function () { openBuilder("panelHist"); }); c2.appendChild(all); }
+    if (hist.length) { var all = el("button", "ghost sm", T("evAll")); all.type = "button"; all.addEventListener("click", function () { openResults(); }); c2.appendChild(all); }
     grid.appendChild(c2);
     /* numbers */
     var names = hist.reduce(function (n, r) { return n + (r.resultsCount || 0); }, 0), c3 = el("div"); c3.appendChild(el("h3", null, T("evGlance")));
@@ -152,7 +160,7 @@
     c3.appendChild(tiles); grid.appendChild(c3); box.appendChild(grid);
     /* getting started: until every step is done */
     var steps = [["ck1", !!lsGet("qms.demoDone", false), function () { runDemo(); }], ["ck2", bank.length > 0 || kbMeta.length > 0, function () { openBuilder("panelBank"); }],
-                 ["ck3", hist.length > 0, function () { goSetup(); }], ["ck4", (st.pdfs || 0) > 0 || !!lsGet("qms.csvDone", false), function () { openBuilder("panelHist"); }]];
+                 ["ck3", hist.length > 0, function () { goSetup(); }], ["ck4", (st.pdfs || 0) > 0 || !!lsGet("qms.csvDone", false), function () { openResults(); }]];
     if (steps.some(function (s) { return !s[1]; })) {
       var ck = el("div", "checklist"); ck.appendChild(el("b", null, T("ckTitle")));
       steps.forEach(function (s) {
@@ -257,14 +265,14 @@
     box.textContent = ""; beginWith(c, box, true);
   }
   function wireHome() {
-    Array.prototype.forEach.call(document.querySelectorAll("#dashboard [data-jump]"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".jumpnav [data-jump]"), function (b) {
       b.addEventListener("click", function () { var p = $(b.getAttribute("data-jump")); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); });
     });
     $("votdNext").addEventListener("click", function () { votdOffset++; paintVerse(); });
     $("lLang").addEventListener("change", function () { lite.langPick = $("lLang").value; $("lOtherWrap").hidden = lite.langPick !== "other"; liteAvail(); });
     $("lOther").addEventListener("input", liteAvail); $("lPart").addEventListener("change", liteAvail);
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-lmode]"), function (b) { b.addEventListener("click", function () { lite.mode = b.getAttribute("data-lmode"); paintLite(); }); });
-    $("bSetupBtn").addEventListener("click", goSetup);
+    $("bSetupBtn").addEventListener("click", goSetup); $("resHome").addEventListener("click", goHomePage); $("anHome").addEventListener("click", goHomePage); $("resAnalytics").addEventListener("click", openAnalytics);
     $("liteStart").addEventListener("click", liteStart); $("liteHome").addEventListener("click", function () { if (S.edition === "basic") showWelcome(); else goHomePage(); });
     $("wGo").addEventListener("click", welcomeGo); $("wName").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); welcomeGo(); } });
     $("wLang").addEventListener("change", function () { setUi($("wLang").value); });

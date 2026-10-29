@@ -175,7 +175,7 @@
      ===================================================================== */
   function repaintStatic() {
     paintSelects(); paintBankInfo(); paintSoundLabel(); paintTimer(); paintFs();
-    if ($("dashboard").classList.contains("active")) paintDashboard();
+    if ($("dashboard").classList.contains("active") || $("resultsPage").classList.contains("active") || $("analytics").classList.contains("active")) paintDashboard();
     if ($("game").classList.contains("active")) paintRound();
     if (!$("setup").classList.contains("active") && !$("auth").classList.contains("active")) return;
     refreshAvail();

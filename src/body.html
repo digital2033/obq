@@ -1,11 +1,15 @@
 <body data-screen="auth">
 <div id="app">
 
+  <aside class="sidebar" id="sidebar" aria-label="Quick navigation" hidden>
+    <button class="sbitem sbtoggle" id="sbToggle" type="button" aria-pressed="false"><span class="sbicon"></span><span class="sblabel" id="sbToggleLabel"></span></button>
+    <nav id="sbNav"></nav>
+  </aside>
   <header class="topbar" id="topbar">
-    <div class="brand">
+    <a class="brand" id="brandLink" href="#" title="Home">
       <img id="logo" alt="" hidden>
       <div><div class="bname" id="bname"></div><div class="btag" id="btag"></div></div>
-    </div>
+    </a>
     <div class="tb-right" id="tbRight" hidden>
       <button class="ghost sm" id="exitFs" type="button" hidden data-i18n="exitFs"></button>
       <a class="navlink" id="goHome" href="#" data-icon="house"><span class="nl" data-i18n="home"></span></a>
@@ -258,10 +262,6 @@
         <button class="ghost sm" type="button" data-jump="panelSetup" data-i18n="jSetup"></button>
         <button class="ghost sm" type="button" data-jump="panelBank" data-i18n="jBank"></button>
         <button class="ghost sm" type="button" data-jump="panelKb" data-i18n="jKb"></button>
-        <button class="ghost sm" type="button" data-jump="panelHist" data-i18n="jHist"></button>
-        <button class="ghost sm" type="button" data-jump="panelOwn" data-i18n="jOwn"></button>
-        <button class="ghost sm" type="button" data-jump="panelActivity" data-i18n="jAct"></button>
-        <button class="ghost sm" type="button" data-jump="panelRemote" data-i18n="jRemote"></button>
       </nav>
 
       <div class="panel2" id="panelSetup">
@@ -297,6 +297,14 @@
           <button class="ghost" id="kbBundleBtn" type="button" data-i18n="kbBundle"></button><input type="file" id="kbBundleFile" accept=".zip" hidden></div>
         <h3 class="gh2" data-i18n="bbTitle"></h3>
         <p class="note" data-i18n="bbIntro"></p>
+        <p class="note bbhelp"><span data-i18n="bbMore"></span> <a href="https://biblebrain.com/" target="_blank" rel="noopener noreferrer">https://biblebrain.com/</a></p>
+        <p class="note bbhelp"><span data-i18n="bbKeyReq"></span> <a href="https://4.dbt.io/api_key/request" target="_blank" rel="noopener noreferrer">https://4.dbt.io/api_key/request</a></p>
+        <ol class="steps bbsteps">
+          <li data-i18n="bbStep1"></li>
+          <li data-i18n="bbStep2"></li>
+          <li data-i18n="bbStep3"></li>
+          <li data-i18n="bbStep4"></li>
+        </ol>
         <div class="fgrid">
           <div class="field"><label for="fKbKey" data-i18n="kbKey"></label><input type="password" id="fKbKey" autocomplete="off"><small data-i18n="kbKeyNote"></small></div>
           <div class="field"><label>&nbsp;</label><button class="primary" id="bbLoad" type="button" data-i18n="bbLoad"></button></div>
@@ -315,6 +323,18 @@
         <div id="kbList"></div>
         <div id="kbPrev"></div>
       </div>
+
+    </div>
+  </section>
+
+  <!-- ================= QUIZ RESULTS ================= -->
+  <section class="screen" id="resultsPage">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="resTitle"></h1><div class="row"><button class="ghost" id="resAnalytics" type="button" data-i18n="hAnalytics"></button><button class="ghost" id="resHome" type="button" data-i18n="home"></button></div></div>
+      <nav class="jumpnav" aria-label="Quiz Results">
+        <button class="ghost sm" type="button" data-jump="panelHist" data-i18n="jHist"></button>
+        <button class="ghost sm" type="button" data-jump="panelOwn" data-i18n="jOwn"></button>
+      </nav>
 
       <div class="panel2" id="panelHist">
         <h2 data-i18n="histTitle"></h2>
@@ -339,17 +359,19 @@
         <pre class="rulesbox" id="ownRules"></pre>
       </div>
 
+    </div>
+  </section>
+
+  <!-- ================= ANALYTICS DASHBOARD ================= -->
+  <section class="screen" id="analytics">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="anTitle"></h1><button class="ghost" id="anHome" type="button" data-i18n="home"></button></div>
       <div class="panel2" id="panelActivity">
         <h2 data-i18n="activity"></h2>
         <div class="stats" id="stats"></div>
         <div class="note" id="fbStatus"></div>
       </div>
 
-      <div class="panel2" id="panelRemote">
-        <h2 data-i18n="remoteTitle"></h2>
-        <p class="note" data-i18n="remoteHelp"></p>
-        <div class="remoteout" id="remoteOut" aria-live="polite"></div>
-      </div>
     </div>
   </section>
 
@@ -386,6 +408,12 @@
         <div class="field"><label for="setSpeed" data-i18n="setSpeedL"></label><select id="setSpeed"></select></div>
         <label class="check"><input type="checkbox" id="setWake"><span data-i18n="setWakeL"></span></label>
       </div>
+      <div class="panel2" id="panelRemote">
+        <h2 data-i18n="remoteTitle"></h2>
+        <p class="note" data-i18n="remoteHelp"></p>
+        <div class="remoteout" id="remoteOut" aria-live="polite"></div>
+      </div>
+
       <div class="panel2" id="setInstall">
         <h2 data-i18n="setInstallTitle"></h2>
         <p id="setInstallState"></p>
@@ -416,7 +444,7 @@
   <section class="screen" id="ownguide">
     <div class="card wide">
       <div class="dash-head"><h1 class="ptitle" data-i18n="guideTitle"></h1>
-        <div class="row"><button class="ghost" id="guideBack" type="button" data-i18n="back2builder"></button><button class="ghost" id="guideHome" type="button" data-i18n="home"></button></div></div>
+        <div class="row"><button class="ghost" id="guideBack" type="button" data-i18n="back2results"></button><button class="ghost" id="guideHome" type="button" data-i18n="home"></button></div></div>
       <p class="note"><b>Optional.</b> You only need this if you want a backup copy of your quiz results in your own cloud database. Without it, your results stay on this device and you can still download them as PDF or CSV. It takes about 10 minutes and is free for normal use (Firebase "Spark" plan). The screens in the Firebase console change from time to time, so names may differ slightly.</p>
       <ol class="steps">
         <li><b>Create a Firebase project.</b> Open <code>console.firebase.google.com</code> and sign in with a Google account. Click <b>Create a project</b> (or <b>Add project</b>), give it a name such as <code>my-obq-results</code>, and continue. Google Analytics is not needed: you can switch it off, then click <b>Create project</b>.</li>
@@ -444,7 +472,7 @@
         <li><b>"Could not find apiKey, projectId and appId".</b> Paste the complete block, including the lines <code>apiKey</code>, <code>projectId</code> and <code>appId</code>.</li>
         <li><b>Nothing appears in Firestore.</b> Make sure you finished a real quiz (not the sample) and that the tick box was on, or press <b>Send results to my Firebase</b> on the final screen.</li>
       </ul>
-      <div class="row"><button class="ghost" id="guideBack2" type="button" data-i18n="back2builder"></button></div>
+      <div class="row"><button class="ghost" id="guideBack2" type="button" data-i18n="back2results"></button></div>
     </div>
   </section>
 

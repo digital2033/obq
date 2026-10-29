@@ -581,7 +581,7 @@
   function onKey(e) {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     var k = e.key, tag = e.target && e.target.tagName, inField = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
-    if ($("dashboard").classList.contains("active")) { if (!inField) remoteTest(e); return; }
+    if ($("settings").classList.contains("active")) { if (!inField) remoteTest(e); return; }
     if (!$("game").classList.contains("active")) return;
     if (k === "F5") { e.preventDefault(); toggleFs(); return; }
     if (inField) {

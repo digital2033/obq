@@ -2,7 +2,7 @@
   <section class="screen" id="qmguide">
     <div class="card wide">
       <div class="dash-head"><h1 class="ptitle" data-i18n="qmGuideTitle"></h1>
-        <div class="row"><button class="ghost" id="qmBack" type="button" data-i18n="back2builder"></button><button class="ghost" id="qmHome" type="button" data-i18n="home"></button></div></div>
+        <div class="row"><button class="ghost" id="qmHome" type="button" data-i18n="home"></button></div></div>
       <p class="note">Everything you need to prepare, run and finish an Oral Bible Quiz. Tap a heading to jump to it.</p>
       <div class="row toc">
         <button class="ghost sm" type="button" data-goto="g-quick">Quick start</button>
@@ -15,6 +15,7 @@
         <button class="ghost sm" type="button" data-goto="g-questions">Your questions</button>
         <button class="ghost sm" type="button" data-goto="g-tips">Tips for oral groups</button>
         <button class="ghost sm" type="button" data-goto="g-help">If something goes wrong</button>
+        <button class="ghost sm" type="button" data-open="ownguide">Firebase instructions</button>
       </div>
 
       <h2 class="gh" id="g-quick">Quick start</h2>
@@ -28,7 +29,7 @@
       <p class="note">New to this? Press <b>Try the 5-question sample quiz</b> on the setup page and run through it once alone, or choose the <b>Simple</b> quiz style for your first real event.</p>
 
       <h2 class="gh">The Home page and OBQ Lite</h2>
-      <p>The <b>Home page</b> opens after sign-in and whenever you press <b>Home</b>. It has an introduction on the left and the menu on the right in three groups: <b>Run a quiz</b>, one <b>Quiz Builder</b> box that holds all your question and results tools, and <b>Account and help</b>. Below them is the <b>Your events</b> panel (your next scheduled events with a Start now button, your recent quizzes, a few numbers, a Getting started checklist and a daily tip), and then the Verse of the Day (in your interface language if you have loaded a Bible text in it, otherwise the King James Version). If your organisation has published a notice (for example an event), it appears at the top. The buttons: Set up a quiz, OBQ Lite, Demo Contest, My saved quizzes, Quiz Builder, Question Bank, Bible Knowledge Base, Quiz Results, Activity Dashboard, My Firebase Backup and these instructions.</p>
+      <p>The <b>Home page</b> opens after sign-in and whenever you press <b>Home</b>. It has an introduction on the left and the menu on the right in four groups: <b>Run a quiz</b>, one <b>Quiz Builder</b> box (your <b>Question Bank</b> and <b>Bible Knowledge Base</b>), one <b>Quiz Results</b> box (<b>My Quiz Results</b> and <b>My Firebase Backup</b>), and <b>Account and help</b> (Analytics Dashboard, Settings and these instructions). Below them is the <b>Your events</b> panel (your next scheduled events with a Start now button, your recent quizzes, a few numbers, a Getting started checklist and a daily tip), and then the Verse of the Day (in your interface language if you have loaded a Bible text in it, otherwise the King James Version). If your organisation has published a notice (for example an event), it appears at the top. In <b>Run a quiz</b> the first row is <b>OBQ Lite - Quick Quiz</b> and <b>Demo Contest</b>, the second row is <b>Set up a quiz</b> and <b>My saved quizzes</b>.</p>
       <p><b>OBQ Lite - Quick Quiz</b> is the fastest way to run a quiz. Choose the quiz language, the part of the Bible (whole Bible, New Testament, Old Testament or one book), the number of questions and Individuals or Groups, then press <b>Start quiz</b>. It always uses the Simple style: regular and multiple-choice questions, 1 point each, with no clues, no 50:50 and no multi-part. The <b>Demo Contest</b> runs a ready-made 10-question quiz so you can see every kind of question.</p>
 
       <h2 class="gh">Terms and Conditions, and Settings</h2>
@@ -36,9 +37,10 @@
       <p>The <b>Settings</b> button in the top bar opens a screen that starts with your <b>profile</b> (name, organisation, country and how you use OBQ), which you can change and save with <b>Update profile</b>; your email address is your sign-in and cannot be changed there. Below it you can choose a <b>dark, light or device-matching theme</b>, the <b>font</b>, the <b>text size</b> (small to extra large), whether to <b>play sounds</b>, the <b>read-aloud speed</b>, whether to <b>keep the screen awake</b> during a quiz, and whether to <b>share anonymous analytics</b>. The choices are remembered on your device (the analytics choice is also saved with your account).</p>
 
       <h2 class="gh">The top bar and page addresses</h2>
-      <p>The bar at the top of every page has an icon for each item, in this order: <b>Home</b>, <b>Instructions</b>, <b>My Quizzes</b> (your saved quizzes), <b>Quiz Results</b> (your finished quizzes), <b>Quiz Builder</b>, the <b>language chooser</b>, <b>Settings</b>, your <b>name</b>, <b>My Profile</b> and <b>Sign out</b> (and <b>Admin</b> for administrators). On a narrow screen only the icons show; hold your finger or mouse on an icon to see its name.</p>
-      <p>Every page has its own web address, so you can bookmark it or share it. After the address of the app they are: <b>/instructions</b>, <b>/settings</b>, <b>/profile</b>, <b>/my-quizzes</b>, <b>/results</b>, <b>/setup</b>, <b>/quick-quiz</b>, <b>/builder</b>, <b>/builder/questionbank</b>, <b>/builder/knowledge-base</b>, <b>/builder/results</b>, <b>/builder/firebase</b>, <b>/builder/activity</b> and <b>/builder/remote</b>. If you open one before signing in, it opens after you sign in. The browser's Back button moves between pages, but it will not take you out of a running quiz.</p>
-      <p>The <b>OBQ Quiz Builder</b> starts with a <b>Set up a quiz</b> box. Its <b>Your activity on this device</b> numbers include the total of the participants entered in your quiz set-ups, the number of quiz languages used, the questions in your question bank and in the built-in bank, and the Bible texts and books in your Bible Knowledge Base.</p>
+      <p>The bar at the top of every page has an icon for each item, in this order: <b>Home</b>, <b>Instructions</b>, <b>My Quizzes</b> (your saved quizzes), <b>Quiz Results</b> (your finished quizzes), <b>Quiz Builder</b>, the <b>language chooser</b>, <b>Settings</b>, your <b>name</b>, <b>My Profile</b> and <b>Sign out</b> (and <b>Admin</b> for administrators). The logo and name at the left lead back to Home. When the screen is not wide enough for the names, only the icons show: point at an icon (or tab to it) to see its name, and on a phone press and hold an icon to see its name without opening the page.</p>
+      <p><b>The left sidebar.</b> On every page except Home and a running quiz, a narrow column of icon boxes on the left gives quick access to every page: Home; Run a quiz (OBQ Lite, Demo Contest, Set up a quiz, My Quizzes); Quiz Builder (Quiz Builder, Question Bank, Bible Knowledge Base); Quiz Results (My Quiz Results, My Firebase Backup); and Analytics Dashboard, Settings and Instructions (and Admin for administrators). The box of the page you are on is highlighted. Point at the column (or tab into it) and it opens to show the names. Press <b>Keep menu open</b> at its top to keep the names showing (it is remembered). On screens narrower than about 900 pixels the sidebar is hidden and the icon bar at the top is used.</p>
+      <p>Every page has its own web address, so you can bookmark it or share it. After the address of the app they are: <b>/instructions</b>, <b>/settings</b>, <b>/profile</b>, <b>/my-quizzes</b>, <b>/results</b>, <b>/setup</b>, <b>/quick-quiz</b>, <b>/builder</b>, <b>/builder/questionbank</b>, <b>/builder/knowledge-base</b>, <b>/results/firebase</b>, <b>/analytics</b>, <b>/settings/remote</b> and <b>/firebase-help</b> (the older <b>/builder/results</b>, <b>/builder/firebase</b>, <b>/builder/activity</b> and <b>/builder/remote</b> addresses still work). If you open one before signing in, it opens after you sign in. The browser's Back button moves between pages, but it will not take you out of a running quiz.</p>
+      <p>The <b>OBQ Quiz Builder</b> starts with a <b>Set up a quiz</b> box, then your <b>Question Bank</b> and <b>Bible Knowledge Base</b>. Your finished quizzes and the backup to your own Firebase are on the <b>Quiz Results</b> page. The <b>Analytics Dashboard</b> shows <b>Your activity on this device</b>; its numbers include the total of the participants entered in your quiz set-ups, the number of quiz languages used, the questions in your question bank and in the built-in bank, and the Bible texts and books in your Bible Knowledge Base.</p>
 
       <h2 class="gh">Working offline and staying signed in</h2>
       <ul class="steps">
@@ -52,7 +54,7 @@
       <ul class="steps">
         <li><b>Questions:</b> decide the source: the built-in English questions, your own Excel question bank, or questions made from Bible text in your language (see "Your questions" below). Preview a few so you know what to expect.</li>
         <li><b>Save it:</b> on the setup page press <b>Save for later</b>. Save as a <b>Template</b> to reuse it for other events, or as a <b>Scheduled event</b> with the date. Tick <b>Freeze the questions now</b> if you want exactly the same questions on the day. Saving clears the setup form (your name is kept) and puts the quiz in <b>My saved quizzes</b> at the top of the setup page. There press <b>Start now</b> to run it, or <b>Open in setup</b> to change something first. A green line reminds you of events in the next 7 days (only while the app is open).</li>
-        <li><b>Test:</b> run the sample quiz once on the same device and screen you will use, with your presentation remote if you have one (Quiz Builder, "Test your presentation remote").</li>
+        <li><b>Test:</b> run the sample quiz once on the same device and screen you will use, with your presentation remote if you have one (Settings, "Test your presentation remote").</li>
         <li><b>Device:</b> charge it, switch off notifications, turn the sound up (the app gives a short sound for the timer and answers), and install the app on the home screen if you can (browser menu, Install app). Installed, it also works without internet.</li>
         <li><b>Do not reload the page during a quiz.</b> Scores are kept only while the quiz is open. Reloading ends it and the points are lost.</li>
         <li><b>Projector or TV:</b> use landscape. The app fits each question on one screen.</li>
@@ -110,7 +112,7 @@
       <p class="note">Simple quiz style uses only the first two rows and always gives 1 point.</p>
 
       <h2 class="gh" id="g-keys">Presentation remote and keyboard</h2>
-      <p>A presentation remote works like a keyboard. Use the <b>Test your presentation remote</b> box in the Quiz Builder to see what each button sends.</p>
+      <p>A presentation remote works like a keyboard. Use the <b>Test your presentation remote</b> box in <b>Settings</b> to see what each button sends.</p>
       <table class="bt">
         <tr><th>Action</th><th>Keyboard</th><th>Remote button</th></tr>
         <tr><td>Next step (clue, show answer, give points, next question)</td><td>Space, Enter, right arrow</td><td>Next slide (PageDown)</td></tr>
@@ -128,8 +130,8 @@
         <li>The final screen shows the winner(s) and the full points table, with confetti if someone scored.</li>
         <li><b>Save results as PDF</b>: an A4 report with your name, email, organisation, event, date, participants, quiz language, scope, quiz style, number of questions and the points table.</li>
         <li><b>Download results (CSV)</b>: the same results for a spreadsheet, one row per participant. A name that starts with = + - or @ gets an apostrophe in front so it cannot run as a formula.</li>
-        <li>Every finished quiz is also kept in <b>Quiz Builder, My quiz results</b> on this device, where you can download or delete it.</li>
-        <li><b>Optional backup:</b> in the Quiz Builder you can connect your own Firebase and send results there (Quiz Builder, My Firebase, Step-by-step instructions). OBQ's own cloud never receives points or names; it only counts that a quiz was set up.</li>
+        <li>Every finished quiz is also kept in <b>Quiz Results, My quiz results</b> on this device, where you can download or delete it.</li>
+        <li><b>Optional backup:</b> on the <b>Quiz Results</b> page you can connect your own Firebase and send results there. <button class="link" type="button" data-open="ownguide">Open the step-by-step Firebase instructions</button> (create a project, allow anonymous sign-in, create the database, publish the rules, paste the settings). OBQ's own cloud never receives points or names; it only counts that a quiz was set up.</li>
         <li><b>Save this quiz to redo later</b> stores the quiz you just played, with its exact questions, in <b>My saved quizzes</b>. Press <b>Start now</b> there to run the same quiz again with fresh scores.</li>
         <li><b>New quiz</b> and <b>Home</b> return to the setup page. After a finished quiz the setup form starts empty (your name and the interface language are kept).</li>
       </ul>
@@ -138,7 +140,7 @@
       <ul class="steps">
         <li><b>Built-in:</b> about {{BANK_COUNT}} English questions across all 66 books, with every kind of question. Narrow scopes may run short, and the app tells you.</li>
         <li><b>My question bank (Excel):</b> Quiz Builder, <b>Download Excel template</b>, fill in the Questions sheet (see the Examples sheet), save, then <b>Upload question bank</b>. Rows with a problem are skipped and listed with their row number. Tick "Add to my existing bank" to add instead of replacing. Categories: One answer, Multiple choice, Short answer with hints, Clue based, Multi-part. Optional columns: Level (Regular, Trivia, Difficult), Points, Seconds, Intro.</li>
-        <li><b>My Bible text:</b> Quiz Builder, <b>Bible Knowledge Base</b>. Choose the language, then upload USFM, USFX, USX or text files (or a zip of them), import a ready-made bundle, or use <b>Bible Brain</b>: enter your API key, press <b>Load countries and languages</b>, choose a country and a language, and press <b>Download</b> next to a fileset in the list. The list shows only the USX and USFM filesets and tells you how many other text filesets (for example plain text) were found but are not shown. You can also type a fileset ID yourself. Bible Brain downloads work from your own web address, not from the preview link. Press <b>Preview questions</b> to check samples, then choose the source <b>Questions generated from my Bible text</b> on the setup page. These questions are "complete the verse" and "which book is this verse from". Have a native speaker review them.</li>
+        <li><b>My Bible text:</b> Quiz Builder, <b>Bible Knowledge Base</b>. Choose the language, then upload USFM, USFX, USX or text files (or a zip of them), import a ready-made bundle, or use <b>Bible Brain</b> (more information at <a href="https://biblebrain.com/" target="_blank" rel="noopener noreferrer">biblebrain.com</a>): first <a href="https://4.dbt.io/api_key/request" target="_blank" rel="noopener noreferrer">request your free API key</a> (it is sent to your email), then enter it, press <b>Load countries and languages</b>, choose a country and a language, and press <b>Download</b> next to a fileset in the list. The list shows only the USX and USFM filesets and tells you how many other text filesets (for example plain text) were found but are not shown. You can also type a fileset ID yourself. Bible Brain downloads work from your own web address, not from the preview link. Press <b>Preview questions</b> to check samples, then choose the source <b>Questions generated from my Bible text</b> on the setup page. These questions are "complete the verse" and "which book is this verse from". Have a native speaker review them.</li>
         <li><b>Quiz language and bank language:</b> the app uses only questions that match the quiz language chosen on the setup page (or have no language set).</li>
         <li><b>Licences:</b> make sure you may use each Bible version you load.</li>
       </ul>
@@ -160,7 +162,7 @@
         <li><b>I pressed Back by mistake.</b> The quiz keeps your points. Press the Next question button to continue.</li>
         <li><b>Full screen does not start.</b> The browser only allows it after a click. Click the full screen button in the top bar. On an iPhone it is not available: install the app to the home screen. Press Esc to leave.</li>
         <li><b>The timer has no sound.</b> Check the Sound button on the quiz screen and your device volume.</li>
-        <li><b>My remote does nothing.</b> Click once on the page first so it has focus, then test the buttons in the Quiz Builder box. Some remotes need their USB receiver plugged in.</li>
+        <li><b>My remote does nothing.</b> Click once on the page first so it has focus, then test the buttons in the box in Settings. Some remotes need their USB receiver plugged in.</li>
         <li><b>Not enough questions.</b> Choose more books, a wider scope, another source, or upload a bigger question bank.</li>
         <li><b>The page reloaded and the scores are gone.</b> A quiz cannot be recovered after a reload. Next time keep the page open; the final results are saved only when the quiz ends.</li>
         <li><b>Excel upload shows skipped rows.</b> Read the row numbers and reasons on screen, correct those rows in Excel and upload again.</li>
@@ -170,7 +172,7 @@
 
       <h2 class="gh">Privacy</h2>
       <p class="note">Participant names and points stay on your device (and in your own Firebase only if you connect one). Do not share a device with your results history. Delete finished results you no longer need in the Quiz Builder. Tell participants that their names and scores are recorded.</p>
-      <div class="row"><button class="ghost" id="qmBack2" type="button" data-i18n="back2builder"></button></div>
+      <div class="row"><button class="ghost" id="qmHome2" type="button" data-i18n="home"></button></div>
     </div>
   </section>
 

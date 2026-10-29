@@ -10,22 +10,26 @@
 ## Features
 
 ### Navigation and page addresses
-- A top bar with an icon for each item: **Home, Instructions, My Quizzes** (saved quizzes), **Quiz Results, Quiz Builder**, the **interface language chooser, Settings**, your name, **My Profile, Sign out** (and Admin for admins). It adapts to the screen: full labels, compact, or icons only.
-- Every page has its own address (works as a direct link or bookmark): `/instructions`, `/settings`, `/profile`, `/my-quizzes`, `/results`, `/setup`, `/quick-quiz`, `/builder`, `/builder/questionbank`, `/builder/knowledge-base`, `/builder/results`, `/builder/firebase`, `/builder/activity`, `/builder/remote`. An address opened before sign-in opens after it; the Back button works between pages but never leaves a running quiz.
+- The logo and name lead back to Home. A top bar with an icon for each item: **Home, Instructions, My Quizzes** (saved quizzes), **Quiz Results, Quiz Builder**, the **interface language chooser, Settings**, your name, **My Profile, Sign out** (and Admin for admins). It adapts to the screen: full labels, compact, or icons only; icon-only items show their name as a tip on hover or keyboard focus, and by press-and-hold on a touch screen.
+- Every page has its own address (works as a direct link or bookmark): `/instructions`, `/settings`, `/settings/remote`, `/profile`, `/my-quizzes`, `/results`, `/results/firebase`, `/analytics`, `/firebase-help`, `/setup`, `/quick-quiz`, `/builder`, `/builder/questionbank`, `/builder/knowledge-base` (the older `/builder/results`, `/builder/firebase`, `/builder/activity` and `/builder/remote` still work and open the new pages). An address opened before sign-in opens after it; the Back button works between pages but never leaves a running quiz.
+
+### Left sidebar
+- On every inner page (not Home, not a running quiz) a slim column of icon boxes gives quick access to every page, in groups: Home; Run a quiz; Quiz Builder; Quiz Results; Analytics Dashboard, Settings, Instructions (and Admin). The current page is highlighted. It opens on hover or keyboard focus to show the names, can be kept open with **Keep menu open** (remembered), and is hidden below 900 px wide, where the top icon bar is used. It follows the interface language, light and dark themes and right-to-left languages.
 
 ### Install and offline
 - **Installable app (PWA):** install it from the Home page or **Settings, Install and offline use** (or the browser's install option; on iPhone, Share, then Add to Home Screen). It then opens like an app and runs offline.
 - **Works without internet:** quizzing, PDF and CSV, the timer, read aloud (with an installed voice). **Needs internet:** sending results to your Firebase, cloud sync, Bible Brain downloads, usage counting. The app must be installed or opened once online first.
 
 ### OBQ Quiz Builder
-- A first **Set up a quiz** box, then Question Bank, Bible Knowledge Base, Quiz Results, My Firebase Backup, Activity and a remote tester, with a jump bar.
+- A first **Set up a quiz** box, then Question Bank and Bible Knowledge Base, with a jump bar. (Quiz Results, My Firebase and the analytics have their own pages, and the remote tester is in Settings.)
 - **Activity on this device:** quizzes run and finished, **total participants** from the quiz set-ups, **languages used**, questions asked, PDFs saved, names on points lists, questions in your question bank and in the built-in bank, Bible texts and books in your knowledge base.
 
 ### Home page
 - Introduction, an optional **announcement** banner (for an event or campaign: set `announcement` in `src/cfg1.js` or in `private/site.config.json`), and the menu in three groups:
-  - **Run a quiz:** Set up a quiz, OBQ Lite, Demo Contest, My saved quizzes.
-  - **Quiz Builder** (one box with all its tools): Question Bank, Bible Knowledge Base, Quiz Results, Activity Dashboard, My Firebase Backup.
-  - **Account and help:** Settings, Quiz Master Instructions (and Admin for admins).
+  - **Run a quiz:** first row OBQ Lite - Quick Quiz and Demo Contest; second row Set up a quiz and My saved quizzes.
+  - **Quiz Builder** (one box): Question Bank, Bible Knowledge Base.
+  - **Quiz Results** (one box): My Quiz Results, My Firebase Backup.
+  - **Account and help:** Analytics Dashboard, Settings, Quiz Master Instructions (and Admin for admins).
 - **Your events** panel: upcoming scheduled events (with Start now), recent finished quizzes, numbers at a glance, a Getting started checklist and a daily tip.
 - A **Verse of the Day** (58 verses, King James Version; shown from your own Bible text when you have loaded one in the interface language).
 - The Quiz Builder page has a jump bar to its sections.
@@ -69,8 +73,8 @@ In the Normal style a 10-question quiz follows this order and repeats for 20 and
 
 ### Questions
 - **Built-in English bank:** 1,390 questions across all 66 books (shipped encrypted; a 198-question sample is in plain text).
-- **Your own questions (Excel):** download the template in the Quiz Builder, fill in the **Questions** sheet (the **Examples** sheet shows each kind) and upload it. Columns: Language, Book, Category (One answer, Multiple choice, Short answer with hints, Clue based, Multi-part), Level (Regular, Trivia, Difficult), Question, Option A to D, Clue 1 to 5, Correct answer, Reference, More to know, Points, Seconds, Intro. Rows with a problem are skipped and listed with their row number; you can add to or replace your bank.
-- **Bible Knowledge Base:** add Bible text in any language (USFM, USFX, USX, plain text, or a zip), import a bundle, or use the **Bible Brain browser**: enter your key, choose a country and a language, and download a USX or USFM fileset (other text types are counted but not listed). OBQ makes "complete the verse" and "which book is this verse from" questions and lets you preview them. The text stays on your device.
+- **Your own questions (Excel):** download the template in the Quiz Builder (Question Bank), fill in the **Questions** sheet (the **Examples** sheet shows each kind) and upload it. Columns: Language, Book, Category (One answer, Multiple choice, Short answer with hints, Clue based, Multi-part), Level (Regular, Trivia, Difficult), Question, Option A to D, Clue 1 to 5, Correct answer, Reference, More to know, Points, Seconds, Intro. Rows with a problem are skipped and listed with their row number; you can add to or replace your bank.
+- **Bible Knowledge Base:** add Bible text in any language (USFM, USFX, USX, plain text, or a zip), import a bundle, or use the **Bible Brain browser** (more information: <https://biblebrain.com/>; request a free API key: <https://4.dbt.io/api_key/request>): enter your key, choose a country and a language, and download a USX or USFM fileset (other text types are counted but not listed). OBQ makes "complete the verse" and "which book is this verse from" questions and lets you preview them. The text stays on your device.
 
 ### Results
 - Finished quizzes show the winners and the full points table.
@@ -82,7 +86,7 @@ In the Normal style a 10-question quiz follows this order and repeats for 20 and
 - **Local mode** (no Firebase): accounts and data stay on the device.
 - **With Firebase:** sign-up with email confirmation, sign-in, **forgot password**, and **sign-in with an email link** (no password). New accounts accept the **Terms and Conditions** (which include the analytics notice) once, at sign-up, in a read-first pop-up. If the online sign-in service cannot be reached, OBQ says so and lets you retry, instead of quietly switching to a local account.
 - **Settings:** an editable **profile** (name, organisation, country, use), theme (dark, light or match the device), font, text size (small to extra large), sounds, read-aloud speed, keep-awake during a quiz, and an **analytics on/off** switch.
-- **Activity dashboard** on the device, a remote-control tester, and built-in **instructions for Quiz Masters**.
+- **Quiz Results** page (finished quizzes on this device, downloads, backup to your own Firebase), **Analytics Dashboard** page (activity on this device), a presentation-remote tester in Settings, and built-in **instructions for Quiz Masters** that link to the Firebase set-up instructions.
 - **Admin screen** (accounts listed as admins): counts of quiz set-ups and Quiz Masters with CSV downloads.
 
 ## Basic version (one simple file)

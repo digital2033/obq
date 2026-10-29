@@ -127,7 +127,7 @@ Object.assign(QUIZ_I18N.en, {
 /* Bible Brain: country and language lists, text filesets */
 Object.assign(QUIZ_I18N.en, {
   bbTitle: "Bible Brain (optional)",
-  bbIntro: "Enter your Bible Brain API key, load the lists, then choose a country and a language. The USX and USFM filesets Bible Brain offers for that language appear below: press Download to add one to your knowledge base.",
+  bbIntro: "Bible Brain is an online library of Bible texts. You can download its USX and USFM texts straight into your Bible Knowledge Base. You need a free API key.",
   bbLoad: "Load countries and languages", bbCountry: "Country", bbLangL: "Language", bbPickCountry: "Choose a country", bbPickLang: "Choose a language",
   bbLoading: "Loading from Bible Brain...", bbCountries: "{n} countries loaded.", bbLangsN: "{n} languages in this country.", bbNoLangs: "Bible Brain lists no languages for this country.",
   bbNone: "No text filesets were found for this language. Try another language, or enter a fileset ID below.", bbFound: "{n} text filesets found for {lang}.",
@@ -252,7 +252,7 @@ Object.assign(QUIZ_I18N.en, {
   setRememberedOn: "This device is remembered: you stay signed in until you sign out, and your email and password also work without internet.",
   setRememberedOff: "This device is not remembered: you will be asked to sign in again when the browser is closed.",
   setForget: "Forget this device (sign out and remove the saved sign-in)",
-  hGroupRun: "Run a quiz", hGroupMore: "Account and help", hBuilderD: "All your question and results tools in one box.",
+  hGroupRun: "Run a quiz", hGroupMore: "Account and help", hBuilderD: "Your question bank and your Bible Knowledge Base in one box.",
   jBank: "Question bank", jKb: "Bible Knowledge Base", jHist: "Results", jOwn: "My Firebase", jAct: "Activity", jRemote: "Remote test",
   evTitle: "Your events", evUpcoming: "Upcoming events", evNoUpcoming: "No event is planned. Set up a quiz and save it as a scheduled event.", evPlan: "Plan an event",
   evRecent: "Recent quizzes", evNoRecent: "No finished quiz yet.", evAll: "All results", evGlance: "At a glance",
@@ -313,4 +313,29 @@ Object.assign(QUIZ_I18N.en, {
   offWorksTitle: "What works without internet", offWork1: "Quizzing", offWork2: "PDF and CSV", offWork3: "The timer", offWork4: "Read aloud (with an installed voice)",
   offNeedsTitle: "What still needs internet", offNeed1: "Sending results to your Firebase", offNeed2: "Cloud sync", offNeed3: "Bible Brain downloads", offNeed4: "Usage counting",
   offNote: "The app must be installed or opened once online first."
+});
+
+/* Bible Brain instructions */
+Object.assign(QUIZ_I18N.en, {
+  bbMore: "More information:", bbKeyReq: "Request your free API key:",
+  bbStep1: "Request your free API key at the address above (it is sent to your email) and copy it.",
+  bbStep2: "Paste the key in the box below and press Load countries and languages.",
+  bbStep3: "Choose a country, then a language. The USX and USFM filesets for that language are listed.",
+  bbStep4: "Press Download next to a fileset to add it to your Bible Knowledge Base. Check the licence of each Bible version before you use it."
+});
+
+/* restructured pages: Quiz Results, Analytics Dashboard, remote test in Settings */
+Object.assign(QUIZ_I18N.en, {
+  resTitle: "Quiz Results", anTitle: "Analytics Dashboard", hAnalytics: "Analytics Dashboard", hAnalyticsD: "Participants, languages, quizzes, questions and your Bible texts at a glance.",
+  hResults: "Quiz Results", hResultsD: "My quiz results on this device, downloads, and the backup to my own Firebase.",
+  hOwn: "My Firebase Backup", hOwnD: "Optional: connect your own Firebase and send your results there.",
+  jHist: "My quiz results", jOwn: "My Firebase", back2results: "Back to Quiz Results", back2guide: "Back to Instructions",
+  remoteTitle: "Test your presentation remote"
+});
+
+/* Quiz Results group on Home, left sidebar */
+Object.assign(QUIZ_I18N.en, {
+  hGroupResults: "Quiz Results", hGroupResultsD: "Your finished quizzes and the backup to your own Firebase.",
+  hResults: "My Quiz Results", hResultsD: "Your finished quizzes on this device: download them as PDF or CSV.",
+  sbPin: "Keep menu open", sbUnpin: "Collapse menu"
 });

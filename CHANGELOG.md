@@ -1,5 +1,34 @@
 # Changelog
 
+## v1.5.0 - left sidebar, Quiz Results group
+
+### Added
+- **Left sidebar** of icon boxes on every inner page (not Home, not a running quiz): Home; Run a quiz (OBQ Lite, Demo Contest, Set up a quiz, My Quizzes); Quiz Builder (Quiz Builder, Question Bank, Bible Knowledge Base); Quiz Results (My Quiz Results, My Firebase Backup); Analytics Dashboard, Settings, Instructions (and Admin). Highlights the current page, opens on hover or keyboard focus to show the names, **Keep menu open** pins it (remembered), hidden below 900 px.
+
+### Changed
+- **Home:** Quiz Results is its own group (a box like Quiz Builder) with **My Quiz Results** and **My Firebase Backup**; **Account and help** keeps Analytics Dashboard, Settings and the instructions.
+
+## v1.4.0 - Results and Analytics pages, tidier Home and Builder
+
+### Changed
+- **Home, Run a quiz:** OBQ Lite - Quick Quiz and Demo Contest on the first row; Set up a quiz and My saved quizzes on the second row.
+- **Home, Quiz Builder box:** only Question Bank and Bible Knowledge Base. **Account and help** now holds Quiz Results, Analytics Dashboard, My Firebase Backup, Settings and the instructions.
+- **Quiz Results** is its own page (`/results`): my quiz results (kept on this device) and My Firebase. The page "Set up your own Firebase" now goes **Back to Quiz Results** (or **Back to Instructions** when it was opened from there).
+- **Analytics Dashboard** is its own page (`/analytics`), showing "Your activity on this device".
+- **Test your presentation remote** moved from the Quiz Builder to **Settings** (`/settings/remote`).
+- The **OBQ Quiz Builder** jump bar now has only Set up a quiz, Question bank and Bible Knowledge Base.
+- Addresses: new `/results/firebase`, `/analytics`, `/settings/remote` and `/firebase-help`; the older `/builder/results`, `/builder/firebase`, `/builder/activity` and `/builder/remote` redirect to them.
+- The instructions page no longer has a "Back to Quiz Builder" button (it has Home) and links to the Firebase set-up instructions.
+
+### Added
+- The **logo and name** in the top bar lead back to Home.
+- **Quiz Results keeps its name** in the top bar on most desktop widths; items that show only an icon now show their name as a tip (hover, keyboard focus, or press and hold on a touch screen).
+
+## v1.3.1 - Bible Brain instructions
+
+### Added
+- The Bible Brain section of the Bible Knowledge Base now has written instructions with links: more information at https://biblebrain.com/ and the free API key request at https://4.dbt.io/api_key/request, plus four short steps (request the key, paste it and load, choose a country and language, download a fileset). The Quiz Master instructions and the README link to them too.
+
 ## v1.3.0 - top navigation, page addresses, install
 
 ### Added

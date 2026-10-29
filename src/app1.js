@@ -85,12 +85,12 @@
   }
 
   /* ---------- screens ---------- */
-  var SCREENS = ["auth", "welcome", "home", "lite", "setup", "dashboard", "admin", "ownguide", "qmguide", "settings", "game", "end"];
+  var SCREENS = ["auth", "welcome", "home", "lite", "setup", "dashboard", "resultsPage", "analytics", "admin", "ownguide", "qmguide", "settings", "game", "end"];
   function show(id) {
     SCREENS.forEach(function (s) { $(s).classList.toggle("active", s === id); });
     document.body.setAttribute("data-screen", id);
-    $("tbRight").hidden = !(user && (S.edition !== "basic") && (id === "home" || id === "lite" || id === "settings" || id === "setup" || id === "dashboard" || id === "admin" || id === "ownguide" || id === "qmguide"));
-    window.scrollTo(0, 0);
+    $("tbRight").hidden = !(user && (S.edition !== "basic") && (id === "home" || id === "lite" || id === "settings" || id === "setup" || id === "dashboard" || id === "resultsPage" || id === "analytics" || id === "admin" || id === "ownguide" || id === "qmguide"));
+    paintSidebar(id); window.scrollTo(0, 0);
   }
 
   /* ---------- usage statistics kept on this device ---------- */

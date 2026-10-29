@@ -2,7 +2,7 @@
   /* =====================================================================
      SETTINGS (theme, font, text size, sound, read-aloud speed, analytics) and TERMS AND CONDITIONS
      ===================================================================== */
-  var SETTINGS_DEFAULT = { theme: S.defaultTheme || "dark", font: "default", size: "m", sound: true, speed: "normal", wake: true };
+  var SETTINGS_DEFAULT = { theme: S.defaultTheme || "dark", font: "default", size: "m", sound: true, speed: "normal", wake: true, sidebar: "rail" };
   var settings = (function () { var s = lsGet("qms.settings", {}), o = {}, k; for (k in SETTINGS_DEFAULT) o[k] = SETTINGS_DEFAULT[k]; for (k in s) if (k in SETTINGS_DEFAULT) o[k] = s[k]; return o; })();
   var FONT_STACKS = { system: 'system-ui, -apple-system, "Segoe UI", Roboto', serif: 'Georgia, "Times New Roman"' };
   var SIZE_SCALE = { s: 0.9, m: 1, l: 1.15, xl: 1.3 };
@@ -71,7 +71,7 @@
 
   /* ---------- the Settings screen ---------- */
   function openSettings(focusId) {
-    paintSettings(); show("settings"); var id = typeof focusId === "string" ? focusId : ""; setUrl(id === "setProfile" ? "profile" : "settings");
+    paintSettings(); show("settings"); var id = typeof focusId === "string" ? focusId : ""; setUrl(id === "setProfile" ? "profile" : (id === "panelRemote" ? "settings/remote" : "settings"));
     if (id) setTimeout(function () { var p = $(id); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   }
   /* ---------- install the app (PWA) and offline use ---------- */
@@ -120,7 +120,7 @@
     $("setAnalyticsNote").textContent = fb.on ? T("setAnalyticsNote") : T("setAnalyticsLocal");
     $("setDeviceInfo").textContent = (rememberPref() && sessGet()) ? T("setRememberedOn") : T("setRememberedOff");
     $("setTermsInfo").textContent = user && user.terms ? T("setTermsInfo", { v: user.terms }) : "";
-    $("setMsg").textContent = ""; paintInstall();
+    $("setMsg").textContent = ""; $("remoteOut").textContent = "-"; paintInstall();
   }
   /* saves the profile: Firestore (and the sign-in display name) when online, the local account otherwise */
   function saveProfile() {

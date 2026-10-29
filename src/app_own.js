@@ -142,7 +142,7 @@
   function checkAdmin() {
     isAdmin = false; $("goAdmin").hidden = true;
     if (!(fb.on && user && user.uid)) return;
-    fb.db.collection("admins").doc(user.uid).get().then(function (d) { isAdmin = !!(d && d.exists); $("goAdmin").hidden = !isAdmin || S.edition === "lite"; if ($("home").classList.contains("active")) paintHome(); }).catch(function () {});
+    fb.db.collection("admins").doc(user.uid).get().then(function (d) { isAdmin = !!(d && d.exists); $("goAdmin").hidden = !isAdmin || S.edition === "lite"; if ($("sidebar") && !$("sidebar").hidden) buildSidebar(); if ($("home").classList.contains("active")) paintHome(); }).catch(function () {});
   }
   function tsOf(v) { try { return v && v.toDate ? v.toDate() : (v ? new Date(v) : null); } catch (e) { return null; } }
   function iso(v) { var d = tsOf(v); return d ? d.toISOString().replace("T", " ").slice(0, 16) : ""; }
@@ -172,10 +172,18 @@
     $("guideCopied").textContent = "Selected: press Ctrl+C (or long-press, Copy).";
   }
   function openQmGuide() { show("qmguide"); setUrl("instructions"); }
+  /* the "Set up your own Firebase" page: its Back button returns to where it was opened from (Quiz Results, or the instructions) */
+  var ownGuideFrom = "results";
+  function openOwnGuide(from) {
+    ownGuideFrom = from === "instructions" ? "instructions" : "results";
+    $("guideRules").textContent = OWN_RULES; $("guideCopied").textContent = "";
+    ["guideBack", "guideBack2"].forEach(function (id) { $(id).textContent = T(ownGuideFrom === "instructions" ? "back2guide" : "back2results"); });
+    show("ownguide"); setUrl("firebase-help");
+  }
   function wireGuide() {
     $("goHelp").addEventListener("click", openQmGuide); $("qmGuideBtn").addEventListener("click", openQmGuide);
-    $("qmBack").addEventListener("click", function () { paintDashboard(); show("dashboard"); }); $("qmBack2").addEventListener("click", function () { paintDashboard(); show("dashboard"); });
-    $("qmHome").addEventListener("click", goHomePage);
+    $("qmHome").addEventListener("click", goHomePage); $("qmHome2").addEventListener("click", goHomePage);
+    Array.prototype.forEach.call(document.querySelectorAll("#qmguide [data-open=ownguide]"), function (b) { b.addEventListener("click", function () { openOwnGuide("instructions"); }); });
     Array.prototype.forEach.call(document.querySelectorAll("#qmguide [data-goto]"), function (b) {
       b.addEventListener("click", function () { var t = $(b.getAttribute("data-goto")); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); });
     });
@@ -188,8 +196,8 @@
       var f = $("ownFile").files && $("ownFile").files[0]; if (!f) return;
       readFileBuf(f).then(function (b) { $("fOwnCfg").value = u8text(new Uint8Array(b)); connectOwn(); $("ownFile").value = ""; });
     });
-    $("ownHelp").addEventListener("click", function () { $("guideRules").textContent = OWN_RULES; $("guideCopied").textContent = ""; show("ownguide"); });
-    ["guideBack", "guideBack2"].forEach(function (id) { $(id).addEventListener("click", function () { paintDashboard(); show("dashboard"); }); });
+    $("ownHelp").addEventListener("click", function () { openOwnGuide("results"); });
+    ["guideBack", "guideBack2"].forEach(function (id) { $(id).addEventListener("click", function () { if (ownGuideFrom === "instructions") openQmGuide(); else openResults(); }); });
     $("guideHome").addEventListener("click", goHomePage);
     $("guideCopy").addEventListener("click", function () {
       var done = function () { $("guideCopied").textContent = T("guideCopied"); };

@@ -31,8 +31,9 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 assert SRC.count("</head>") == 1 and SRC.count("</body>") == 1 and SRC.count("<head>") == 1
 # page addresses: every page has an address such as /instructions or /builder/questionbank. This tiny script (first in the head) works out the
 # folder the app lives in, so that the page and its files load from any of those addresses.
-ROUTES = ["builder/questionbank", "builder/knowledge-base", "builder/results", "builder/firebase", "builder/activity", "builder/remote", "builder",
-          "instructions", "settings", "profile", "my-quizzes", "results", "setup", "quick-quiz", "admin"]
+ROUTES = ["builder/questionbank", "builder/knowledge-base", "builder/results", "builder/firebase", "builder/activity", "builder/remote",
+          "results/firebase", "settings/remote", "builder", "results", "analytics", "instructions", "settings", "profile", "my-quizzes",
+          "setup", "quick-quiz", "admin", "firebase-help"]
 base_js = ("<script>(function(){var p=location.pathname;if(!/^https?:$/.test(location.protocol)||p.charAt(0)!==\"/\")return;var R=" + json.dumps(ROUTES) +
            ";var q=p.replace(/index\\.html$/,\"\").replace(/\\/+$/,\"\"),b=null,i,s;for(i=0;i<R.length;i++){s=\"/\"+R[i];if(q.length>=s.length&&q.slice(-s.length)===s){b=q.slice(0,q.length-s.length)+\"/\";break;}}"
            "if(b===null)b=p.replace(/[^\\/]*$/,\"\");window.__OBQ_BASE=b;document.write('<base href=\"'+b+'\">');})();</script>")
