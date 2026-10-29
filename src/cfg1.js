@@ -9,6 +9,11 @@ var QUIZ_SETTINGS = {
   logo: "@logo",                      // "@logo" = the OBQ logo from assets/ (embedded when you build). Or a data: URI / "logo.png" next to this file, or "" for none. Shown on screens and in the PDF
   edition: "full",                    // "full" = all features on the Home page. "lite" = OBQ Lite edition: only the quick quiz, the demo contest and the instructions
   requireLogin: true,                 // true = Quiz Masters must sign up / sign in first
+  requireTerms: true,                 // true = new accounts must accept the Terms and Conditions (which include the analytics notice); existing accounts accept again when termsVersion changes
+  termsVersion: "2026-10",            // change this text whenever you change src/terms.html: everybody will be asked to accept the new version
+  operatorName: "",                   // shown in the Terms ("provided by ...") - fill in before launch, or set it in private/site.config.json
+  contactEmail: "",                   // shown in the Terms as the contact for questions and data requests - or set it in private/site.config.json
+  defaultTheme: "dark",               // "dark", "light" or "system"; each user can change it in Settings
   requireEmailVerification: true,     // true = a new account must confirm its email address (link sent by Firebase) before it can be used. Needs Firebase; local test mode cannot send email
   skipLoginButton: false,             // TESTING ONLY: true shows a "Skip login" button. Keep false for the live version
   defaultUiLang: "en",                // interface language on first open (code from the list below)
@@ -28,6 +33,10 @@ var QUIZ_SETTINGS = {
   pdfFilePrefix: "obq-results",       // start of the PDF file name
   builtInBank: true,                  // true = offer the built-in starter questions (English)
   sampleQuizButton: true,             // true = show "Try the 5-question sample quiz" on the setup page
+  colorsLight: {                      // the light-mode palette
+    bg: "#FFF8F1", panel: "#FFFFFF", panelHi: "#FFEBD6", ink: "#2B1A0E", muted: "#6E5543",
+    accent: "#C2410C", accentInk: "#FFFFFF", chip: "#C2410C", good: "#14795A", goodInk: "#FFFFFF", bad: "#C62828"
+  },
   colors: {                           // Orange palette. Change any value to re-colour the whole app
     bg: "#1B1410", panel: "#2A1F18", panelHi: "#3A2B20", ink: "#FFF6EC", muted: "#D9C3AE",
     accent: "#F7931E", accentInk: "#2A1500", chip: "#D9480F", good: "#3DDBA4", goodInk: "#05281D", bad: "#FF6B6B"

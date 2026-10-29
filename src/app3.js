@@ -81,9 +81,9 @@
     list.forEach(function (x, i) { if (x.total !== prev) { rank = i + 1; prev = x.total; } x.rank = rank; });
     return list;
   }
-  function flash(text) {
+  function flash(text, ms) {
     var m = $("entryMsg"); m.textContent = text; clearTimeout(msgTimer);
-    msgTimer = setTimeout(function () { m.textContent = ""; }, 2800);
+    msgTimer = setTimeout(function () { m.textContent = ""; }, ms || 2800);
   }
   function splitNames(v) { return String(v || "").split(/[,،，;]+/).map(normName).filter(Boolean).map(function (n) { return n.slice(0, 40); }); }
   function award() {
@@ -344,35 +344,97 @@
   function showHint() { var rd = ROUNDS[r], st = rd.hintStages || []; if (!hasHint(rd) || revealed) return; hintStep++; beep(440, 0.1); paintRound(); if (cfg && cfg.readAloud) readQuestion(true); }
 
   /* ---------- Read aloud: the browser's own text-to-speech reads the question for the participants ---------- */
-  var speechOK = !!(window.speechSynthesis && window.SpeechSynthesisUtterance), voices = [], noVoiceWarned = false;
+  var speechOK = !!(window.speechSynthesis && window.SpeechSynthesisUtterance), voices = [], noVoiceWarned = false, speakToken = 0, speakingNow = false;
   var SPEECH_CUSTOM = { kannada: "kn-IN", gujarati: "gu-IN", sinhala: "si-LK", assamese: "as-IN", spanish: "es-ES", french: "fr-FR", portuguese: "pt-PT", swahili: "sw-KE", indonesian: "id-ID", arabic: "ar-SA", chinese: "zh-CN", russian: "ru-RU", german: "de-DE" };
+  /* languages written in Devanagari can be read acceptably by a Hindi voice when no voice of their own is installed */
+  var SPEECH_FALLBACK = { mr: ["hi"], ne: ["hi", "mr"] };
+  /* how the option letters are spoken, so a Hindi (etc.) voice does not read "A. B. C." in English */
+  var SPEECH_LETTERS = { hi: ["ए", "बी", "सी", "डी"], mr: ["ए", "बी", "सी", "डी"], ne: ["ए", "बी", "सी", "डी"], ml: ["എ", "ബി", "സി", "ഡി"], ta: ["ஏ", "பி", "சி", "டி"], te: ["ఎ", "బి", "సి", "డి"],
+                         bn: ["এ", "বি", "সি", "ডি"], pa: ["ਏ", "ਬੀ", "ਸੀ", "ਡੀ"], or: ["ଏ", "ବି", "ସି", "ଡି"], ur: ["اے", "بی", "سی", "ڈی"] };
   function loadVoices() { try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
-  if (speechOK) { loadVoices(); try { window.speechSynthesis.onvoiceschanged = loadVoices; } catch (e) {} }
-  function speechLocale() { var L = langInfo(quizLang); return L.code === quizLang ? L.locale : (SPEECH_CUSTOM[quizLang] || ""); }
-  function pickVoice(loc) {
-    if (!loc || !voices.length) return null;
-    var low = loc.toLowerCase(), pre = low.split("-")[0];
-    var norm = function (v) { return String(v.lang || "").toLowerCase().replace("_", "-"); };
-    return voices.filter(function (v) { return norm(v) === low; })[0] || voices.filter(function (v) { return norm(v).split("-")[0] === pre; })[0] || null;
+  if (speechOK) { loadVoices(); try { window.speechSynthesis.onvoiceschanged = function () { loadVoices(); refreshVoicePickers(); }; } catch (e) {} }
+  function whenVoices(cb) {                                   // Chrome fills the voice list a moment after start-up: wait for it (at most 1.5 s)
+    loadVoices(); if (voices.length) { cb(); return; }
+    var done = false, fin = function () { if (done) return; done = true; loadVoices(); cb(); };
+    try { window.speechSynthesis.addEventListener("voiceschanged", fin); } catch (e) {}
+    setTimeout(fin, 1500);
+  }
+  function trIn(code, key) { return (I18N[code] && I18N[code][key]) || I18N.en[key] || key; }
+  function langCodeOf(label) { var L = langInfo(label); return L.code === label ? L.code : ""; }
+  function speechLocaleOf(lang) { var L = langInfo(lang); return L.code === lang ? L.locale : (SPEECH_CUSTOM[String(lang).toLowerCase()] || ""); }
+  function speechLocale() { return speechLocaleOf(quizLang); }
+  function vLang(v) { return String(v.lang || "").toLowerCase().replace("_", "-"); }
+  function voiceScore(v, loc) {
+    var l = vLang(v), n = String(v.name || "").toLowerCase(), sc = 0;
+    if (l === loc.toLowerCase()) sc += 4;
+    if (/natural|neural|online/.test(n)) sc += 3; else if (/google/.test(n)) sc += 2;
+    if (v.localService) sc += 1;
+    return sc;
+  }
+  function voicesFor(loc) {                                   // voices of this language, best first
+    if (!loc) return [];
+    var pre = loc.toLowerCase().split("-")[0];
+    return voices.filter(function (v) { return vLang(v).split("-")[0] === pre; }).sort(function (a, b) { return voiceScore(b, loc) - voiceScore(a, loc); });
+  }
+  function voiceKey(v) { return v.voiceURI || v.name; }
+  function savedVoice(code) {
+    var k = lsGet("qms.voice." + code, ""); if (!k) return null;
+    return voices.filter(function (v) { return voiceKey(v) === k || v.name === k; })[0] || null;
+  }
+  /* the voice to use for a quiz language: the saved choice, else the best voice of that language, else a close language, else none */
+  function chooseVoice(lang) {
+    var code = String(lang).toLowerCase(), loc = speechLocaleOf(lang), saved = savedVoice(code);
+    if (saved) return { voice: saved, lang: saved.lang || loc, note: "" };
+    var own = voicesFor(loc); if (own.length) return { voice: own[0], lang: own[0].lang || loc, note: "" };
+    var fb = SPEECH_FALLBACK[code] || [];
+    for (var i = 0; i < fb.length; i++) { var alt = voicesFor(speechLocaleOf(fb[i])); if (alt.length) return { voice: alt[0], lang: alt[0].lang, note: "voiceFallback", from: langInfo(fb[i]).english }; }
+    return { voice: null, lang: loc, note: "" };
   }
   function paintRead() {
     var b = $("readBtn"); if (!b) return;
-    b.hidden = !speechOK; var on = false; try { on = speechOK && window.speechSynthesis.speaking; } catch (e) {}
-    b.textContent = on ? T("stopReading") : T("readAloud");
+    b.hidden = !speechOK; b.textContent = speakingNow ? T("stopReading") : T("readAloud");
   }
-  function stopSpeech() { try { if (speechOK) window.speechSynthesis.cancel(); } catch (e) {} paintRead(); }
-  function speak(text) {
+  function stopSpeech() { speakToken++; speakingNow = false; try { if (speechOK) window.speechSynthesis.cancel(); } catch (e) {} paintRead(); }
+  /* short pieces: some engines (Chrome with online voices) stop in the middle of a long text */
+  function chunkText(t) {
+    var out = [], cur = "", i, ch, stops = ".!?;:\u0964\u0965\u061F\u06D4\n";
+    function flush() { if (cur.replace(/\s+/g, "")) out.push(cur.trim()); cur = ""; }
+    for (i = 0; i < t.length; i++) {
+      ch = t.charAt(i); cur += ch;
+      if (stops.indexOf(ch) > -1 && (i + 1 >= t.length || /\s/.test(t.charAt(i + 1)))) flush();
+      else if (cur.length >= 170 && /[\s,]/.test(ch)) flush();
+    }
+    flush(); return out;
+  }
+  function speakChunks(chunks, voice, lang, token) {
+    if (token !== speakToken) return;
+    if (!chunks.length) { speakingNow = false; paintRead(); return; }
+    var u = new window.SpeechSynthesisUtterance(chunks.shift());
+    if (lang) u.lang = lang;
+    if (voice) u.voice = voice;
+    u.rate = speechRateValue();
+    u.onend = function () { speakChunks(chunks, voice, lang, token); };
+    u.onerror = function () { if (token === speakToken) { speakingNow = false; paintRead(); } };
+    try { window.speechSynthesis.speak(u); } catch (e) { speakingNow = false; paintRead(); }
+  }
+  function speakIn(text, lang, quiet) {
     if (!speechOK || !text) return;
     stopSpeech();
-    var u = new window.SpeechSynthesisUtterance(text), loc = speechLocale(), v = pickVoice(loc);
-    if (loc) u.lang = loc;
-    if (v) u.voice = v;
-    u.rate = S.speechRate || 0.9;
-    if (loc && voices.length && !v && !noVoiceWarned) { noVoiceWarned = true; flash(T("noVoice", { lang: (cfg && cfg.quizLangLabel) || quizLang })); }
-    u.onend = u.onerror = paintRead;
-    try { window.speechSynthesis.speak(u); } catch (e) {}
-    setTimeout(paintRead, 120);
+    var token = speakToken;
+    whenVoices(function () {
+      if (token !== speakToken) return;
+      var pick = chooseVoice(lang);
+      if (!pick.voice && voices.length && speechLocaleOf(lang)) {            // a wrong voice would be unintelligible: say so instead of reading it badly
+        if (!quiet && !noVoiceWarned) { noVoiceWarned = true; flash(T("noVoice", { lang: (cfg && cfg.quizLangLabel) || lang }), 9000); }
+        return;
+      }
+      if (pick.note && !quiet && !noVoiceWarned) { noVoiceWarned = true; flash(T(pick.note, { from: pick.from }), 6000); }
+      speakingNow = true; paintRead();
+      setTimeout(function () { speakChunks(chunkText(text), pick.voice, pick.lang, token); }, 70);      // a short pause after cancel(): some phones drop an immediate speak()
+    });
   }
+  function speak(text) { speakIn(text, quizLang, false); }
+  function letter(i) { var L = SPEECH_LETTERS[langCodeOf(quizLang)]; return L ? L[i] : String.fromCharCode(65 + i); }
   function visibleOptions(rd) {
     return rd.options.map(function (t, i) { return { t: t, i: i }; }).filter(function (o) { return !(rd.fifty && hintStep >= 1 && Array.isArray(rd.fifty) && rd.fifty.indexOf(o.i) > -1); });
   }
@@ -380,14 +442,43 @@
     var rd = ROUNDS[r], out = [], isWho = rd.type === "who", i;
     if (!onlyNew) out.push(isWho ? (rd.q || TQ("whoAmI")) : (rd.q || ""));
     if (rd.parts && !onlyNew) rd.parts.forEach(function (p, n) { out.push((n + 1) + ". " + p.q); });
-    if (rd.options && (!onlyNew || (rd.fifty && hintStep >= 1))) out.push(visibleOptions(rd).map(function (o) { return String.fromCharCode(65 + o.i) + ". " + o.t; }).join(". "));
+    if (rd.options && (!onlyNew || (rd.fifty && hintStep >= 1))) out.push(visibleOptions(rd).map(function (o) { return letter(o.i) + ". " + o.t; }).join(". "));
     if (isWho) { if (onlyNew) out.push(TQ("clueW") + " " + shown + ": " + rd.clues[shown - 1]); else for (i = 0; i < shown; i++) out.push(TQ("clueW") + " " + (i + 1) + ": " + rd.clues[i]); }
     if (hintStep > 0 && rd.hintStages && rd.hintStages[hintStep - 1]) out.push(rd.hintStages[hintStep - 1].filter(function (t) { return t.charAt(0) !== "~"; }).join(". "));
     return out.filter(Boolean).join(". ");
   }
   function answerText() { var rd = ROUNDS[r]; return TQ("correct") + ": " + (rd.parts ? rd.parts.map(function (p) { return p.a; }).join(". ") : rd.a); }
   function readQuestion(onlyNew) { speak(revealed ? answerText() : questionText(onlyNew)); }
-  function toggleRead() { var on = false; try { on = window.speechSynthesis.speaking; } catch (e) {} if (on) stopSpeech(); else readQuestion(false); }
+  function toggleRead() { if (speakingNow) stopSpeech(); else readQuestion(false); }
+
+  /* ---------- voice picker on the setup page and OBQ Lite: choose and test the voice for the quiz language ---------- */
+  var voicePickers = [];
+  function fillVoicePicker(p) {
+    var lang = p.getLang(), sel = $(p.sel), note = $(p.note), wrap = $(p.wrap);
+    wrap.hidden = !speechOK || !$(p.tick).checked; if (wrap.hidden) return;
+    var code = String(lang || "").toLowerCase(), loc = speechLocaleOf(lang), own = voicesFor(loc), pickKey = lsGet("qms.voice." + code, "");
+    clear(sel);
+    var o0 = el("option", null, T("voiceAuto")); o0.value = ""; sel.appendChild(o0);
+    function add(v, parent) { var o = el("option", null, v.name + " (" + v.lang + (v.localService ? "" : ", online") + ")"); o.value = voiceKey(v); (parent || sel).appendChild(o); }
+    own.forEach(function (v) { add(v); });
+    var others = voices.filter(function (v) { return own.indexOf(v) < 0; });
+    if (others.length) { var g = el("optgroup"); g.label = T("voiceOthers"); others.forEach(function (v) { add(v, g); }); sel.appendChild(g); }
+    sel.value = pickKey; if (sel.value !== pickKey) sel.value = "";
+    var pick = chooseVoice(lang);
+    note.textContent = !lang ? "" : (own.length ? T("voiceFound", { n: own.length, lang: loc }) : (pick.voice ? (pick.from ? T("voiceFallback", { from: pick.from }) : T("voiceChosen")) : T("voiceNone", { lang: loc || lang })));
+  }
+  function refreshVoicePickers() { voicePickers.forEach(function (p) { try { fillVoicePicker(p); } catch (e) {} }); }
+  function wireVoicePicker(p) {
+    voicePickers.push(p);
+    $(p.sel).addEventListener("change", function () { var lang = p.getLang(); if (lang) lsSet("qms.voice." + String(lang).toLowerCase(), $(p.sel).value); fillVoicePicker(p); });
+    $(p.test).addEventListener("click", function () {
+      var lang = p.getLang(); if (!lang) return;
+      var code = langCodeOf(lang) || "en";
+      speakIn(trIn(code, "begin") + ". " + trIn(code, "correct") + ".", lang, false);
+    });
+    $(p.tick).addEventListener("change", function () { fillVoicePicker(p); });
+  }
+
   function reveal() {
     if (revealed) return;
     revealed = true; stopTimer(); paintTimer(); chime(); timeUp = false; paintRound();
@@ -528,7 +619,7 @@
       if (e.key === "Enter") { e.preventDefault(); award(); }
       else if (e.key === "Escape") { $("nameIn").blur(); }
     });
-    $("sound").addEventListener("click", function () { soundOn = !soundOn; paintSoundLabel(); });
+    $("sound").addEventListener("click", function () { soundOn = !soundOn; settings.sound = soundOn; saveSettings(); paintSoundLabel(); });
     $("readBtn").addEventListener("click", toggleRead);
     document.addEventListener("keydown", onKey);
   }
@@ -547,7 +638,7 @@
     $("exitFs").hidden = !isFs(); $("exitFs2").hidden = !isFs();          // clear "Exit full screen" buttons on every page
   }
   var wakeLock = null;
-  function keepAwake() { try { if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {}); } catch (x) {} }
+  function keepAwake() { if (settings.wake === false) return; try { if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {}); } catch (x) {} }
 
   /* Landscape: fit each column on one screen by shrinking its content instead of scrolling */
   var MIN_FIT = 0.45, fitQueued = false;

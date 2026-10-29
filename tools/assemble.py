@@ -38,6 +38,13 @@ elif os.path.exists(enc_file) and bank_key:
 else:
     bank_src = rd("cfg3_bank.js"); print("question bank: sample bank (src/cfg3_bank.js)" + (" - encrypted bank present but no key (OBQ_BANK_KEY / private/bank.key)" if os.path.exists(enc_file) else ""))
 cfg = "\n".join([rd(n) for n in ["cfg1.js", "cfg2_en.js", "cfg2_hi_ml.js", "cfg2_or_ta.js", "cfg2_te_pa_bn.js", "cfg2_ne_ur_mr.js", "cfg2_extra.js", "cfg3.js"]] + [bank_src, rd("cfg4_verses.js")])
+site_file = os.path.join(PRIV, "site.config.json")           # optional: {"operatorName": "...", "contactEmail": "..."}
+if os.path.exists(site_file):
+    import json as _s
+    site = _s.load(open(site_file, encoding="utf-8"))
+    for k in ("operatorName", "contactEmail"):
+        if site.get(k): cfg = re.sub(r"(%s: )\"[^\"]*\"" % k, lambda m: m.group(1) + _s.dumps(str(site[k])), cfg, count=1)
+    print("site details: PRIVATE (private/site.config.json)")
 fb_file = os.path.join(PRIV, "firebase.config.json")
 if os.path.exists(fb_file):
     import json
@@ -51,7 +58,7 @@ else:
     print("firebase config: none (local mode)")
 
 # 3. engine
-engine = "\n".join(rd(n) for n in ["app1.js", "app2.js", "app_kb.js", "app_saved.js", "app_own.js", "app_home.js", "app3.js", "app4.js"])
+engine = "\n".join(rd(n) for n in ["app1.js", "app2.js", "app_kb.js", "app_saved.js", "app_own.js", "app_home.js", "app_settings.js", "app3.js", "app4.js"])
 
 # 3b. logo (assets/) embedded as a small data URI, plus a favicon
 import io
@@ -103,7 +110,7 @@ html = f"""<!DOCTYPE html>
 {css}
 </style>
 </head>
-{rd("body.html").replace("<!--QMGUIDE-->", rd("guide_qm.html").replace("{{BANK_COUNT}}", bank_count))}
+{rd("body.html").replace("<!--QMGUIDE-->", rd("guide_qm.html").replace("{{BANK_COUNT}}", bank_count)).replace("<!--TERMS-->", rd("terms.html"))}
 <script>
 {engine}
 </script>

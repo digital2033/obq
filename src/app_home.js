@@ -14,7 +14,8 @@
     cloud: '<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/>',
     shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
-    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'
+    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
   };
   function icon(name) { return '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || "") + "</svg>"; }
 
@@ -39,6 +40,7 @@
     { id: "results",  icon: "chart",   t: "hResults",  d: "hResultsD",  lite: false, go: function () { openBuilder("panelHist"); } },
     { id: "activity", icon: "pulse",   t: "hActivity", d: "hActivityD", lite: false, go: function () { openBuilder("panelActivity"); } },
     { id: "firebase", icon: "cloud",   t: "hOwn",      d: "hOwnD",      lite: false, go: function () { openBuilder("panelOwn"); } },
+    { id: "settings", icon: "gear",    t: "hSettings", d: "hSettingsD", lite: true,  go: function () { openSettings(); } },
     { id: "help",     icon: "help",    t: "hHelp",     d: "hHelpD",     lite: true,  go: function () { show("qmguide"); } },
     { id: "admin",    icon: "shield",  t: "hAdmin",    d: "hAdminD",    lite: false, adminOnly: true, go: openAdmin }
   ];
@@ -120,7 +122,7 @@
       b.addEventListener("click", function () { lite.numQ = n; paintLite(); }); qc.appendChild(b);
     });
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-lmode]"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lmode") === lite.mode ? "true" : "false"); });
-    $("lReadWrap").hidden = !speechOK; liteAvail();
+    $("lReadWrap").hidden = !speechOK; refreshVoicePickers(); liteAvail();
   }
   function liteAvail() {
     var c = liteCfg(), t = $("liteAvail"); $("liteErr").textContent = ""; t.textContent = "";

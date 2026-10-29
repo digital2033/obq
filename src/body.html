@@ -10,8 +10,10 @@
       <button class="ghost sm" id="exitFs" type="button" hidden data-i18n="exitFs"></button>
       <button class="ghost sm" id="goHome" type="button" data-i18n="home"></button>
       <button class="ghost sm" id="goHelp" type="button" data-i18n="helpBtn"></button>
+      <button class="ghost sm" id="goSettings" type="button" data-i18n="settingsBtn"></button>
       <button class="ghost sm" id="goDash" type="button" data-i18n="dashBtn"></button>
       <button class="ghost sm" id="goAdmin" type="button" hidden data-i18n="adminBtn"></button>
+      <select class="tb-lang" id="tbLang" aria-label="Language"></select>
       <span class="uchip" id="uchip"></span>
       <button class="ghost sm" id="signOutBtn" type="button" data-i18n="signOut"></button>
     </div>
@@ -40,7 +42,7 @@
         <div class="field"><label for="upCountry" data-i18n="country"></label><input type="text" id="upCountry" autocomplete="country-name" maxlength="60"></div>
         <div class="field"><label for="upUsage" data-i18n="usage"></label><select id="upUsage"></select></div>
         <div class="field"><label for="upPass" data-i18n="pass"></label><input type="password" id="upPass" autocomplete="new-password"></div>
-        <label class="check"><input type="checkbox" id="upConsent" checked><span data-i18n="consent"></span></label>
+        <label class="check"><input type="checkbox" id="upTerms"><span><span data-i18n="termsAgree"></span> <button class="link" type="button" id="upTermsLink" data-i18n="termsRead"></button></span></label>
         <button class="primary" type="button" id="btnUp" data-i18n="btnUp"></button>
       </div>
       <button class="ghost" id="skipLogin" type="button" hidden data-i18n="skipLogin"></button>
@@ -65,7 +67,7 @@
         <div class="field"><label for="pfOrg" data-i18n="org"></label><input type="text" id="pfOrg" autocomplete="organization" maxlength="100"></div>
         <div class="field"><label for="pfCountry" data-i18n="country"></label><input type="text" id="pfCountry" autocomplete="country-name" maxlength="60"></div>
         <div class="field"><label for="pfUsage" data-i18n="usage"></label><select id="pfUsage"></select></div>
-        <label class="check"><input type="checkbox" id="pfConsent" checked><span data-i18n="consent"></span></label>
+        <label class="check"><input type="checkbox" id="pfTerms"><span><span data-i18n="termsAgree"></span> <button class="link" type="button" id="pfTermsLink" data-i18n="termsRead"></button></span></label>
         <button class="primary" id="pfSave" type="button" data-i18n="pfSave"></button>
       </div>
       <div class="err" id="authErr" role="alert"></div>
@@ -119,6 +121,11 @@
         </div>
       </div>
       <label class="check" id="lReadWrap"><input type="checkbox" id="lRead"><span data-i18n="fRead"></span></label>
+      <div class="field" id="lVoiceWrap" hidden>
+        <label for="lVoice" data-i18n="voiceL"></label>
+        <div class="row"><select id="lVoice"></select><button class="ghost sm" id="lVoiceTest" type="button" data-i18n="voiceTest"></button></div>
+        <small class="note" id="lVoiceNote"></small>
+      </div>
       <div class="note" id="liteAvail" aria-live="polite"></div>
       <div class="err" id="liteErr" role="alert"></div>
       <div class="row"><button class="primary" id="liteStart" type="button" data-i18n="begin"></button><button class="ghost" id="liteHome" type="button" data-i18n="home"></button></div>
@@ -183,6 +190,11 @@
       </div>
 
       <label class="check" id="readWrap"><input type="checkbox" id="fRead"><span data-i18n="fRead"></span></label>
+      <div class="field" id="voiceWrap" hidden>
+        <label for="fVoice" data-i18n="voiceL"></label>
+        <div class="row"><select id="fVoice"></select><button class="ghost sm" id="fVoiceTest" type="button" data-i18n="voiceTest"></button></div>
+        <small class="note" id="fVoiceNote"></small>
+      </div>
       <label class="check" id="saveResWrap" hidden><input type="checkbox" id="fSaveRes" checked><span data-i18n="fSaveRes"></span></label>
       <div class="err" id="setupErr" role="alert"></div>
       <div class="row">
@@ -287,6 +299,50 @@
         <p class="note" data-i18n="remoteHelp"></p>
         <div class="remoteout" id="remoteOut" aria-live="polite"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <section class="screen" id="settings">
+    <div class="card wide">
+      <div class="dash-head"><h1 class="ptitle" data-i18n="setTitle"></h1><button class="ghost" id="setHome" type="button" data-i18n="home"></button></div>
+      <div class="panel2" id="setProfile">
+        <h2 data-i18n="setProfile"></h2>
+        <div class="fgrid">
+          <div class="field"><label for="setName" data-i18n="fullName"></label><input type="text" id="setName" maxlength="80" autocomplete="name"></div>
+          <div class="field"><label for="setEmail" data-i18n="email"></label><input type="email" id="setEmail" readonly><small class="note" data-i18n="setEmailNote"></small></div>
+          <div class="field"><label for="setOrg" data-i18n="org"></label><input type="text" id="setOrg" maxlength="100" autocomplete="organization"></div>
+          <div class="field"><label for="setCountry" data-i18n="country"></label><input type="text" id="setCountry" maxlength="60" autocomplete="country-name"></div>
+          <div class="field"><label for="setUsage" data-i18n="usage"></label><select id="setUsage"></select></div>
+        </div>
+        <div class="row"><button class="primary" id="setProfileSave" type="button" data-i18n="setProfileSave"></button><span class="okmsg" id="setProfileMsg" aria-live="polite"></span></div>
+      </div>
+      <div class="panel2">
+        <h2 data-i18n="setAppearance"></h2>
+        <div class="field"><span class="lbl" data-i18n="setTheme"></span>
+          <div class="modes" role="group">
+            <button class="mode" type="button" data-theme-set="dark"><span class="mt" data-i18n="themeDark"></span></button>
+            <button class="mode" type="button" data-theme-set="light"><span class="mt" data-i18n="themeLight"></span></button>
+            <button class="mode" type="button" data-theme-set="system"><span class="mt" data-i18n="themeSystem"></span></button>
+          </div>
+        </div>
+        <div class="field"><label for="setFont" data-i18n="setFont"></label><select id="setFont"></select></div>
+        <div class="field"><span class="lbl" data-i18n="setSize"></span><div class="segchoice" id="setSize"></div></div>
+      </div>
+      <div class="panel2">
+        <h2 data-i18n="setQuiz"></h2>
+        <label class="check"><input type="checkbox" id="setSound"><span data-i18n="setSoundL"></span></label>
+        <div class="field"><label for="setSpeed" data-i18n="setSpeedL"></label><select id="setSpeed"></select></div>
+        <label class="check"><input type="checkbox" id="setWake"><span data-i18n="setWakeL"></span></label>
+      </div>
+      <div class="panel2">
+        <h2 data-i18n="setPrivacy"></h2>
+        <label class="check"><input type="checkbox" id="setAnalytics"><span data-i18n="setAnalyticsL"></span></label>
+        <p class="note" id="setAnalyticsNote"></p>
+        <p class="note" id="setTermsInfo"></p>
+        <div class="row"><button class="ghost" id="setTermsBtn" type="button" data-i18n="termsRead"></button></div>
+      </div>
+      <div class="row"><button class="ghost" id="setReset" type="button" data-i18n="setReset"></button><span class="okmsg" id="setMsg" aria-live="polite"></span></div>
     </div>
   </section>
 
@@ -431,5 +487,24 @@
     </div>
     <div class="export-msg" id="exportMsg" aria-live="polite"></div>
   </section>
+
+  <!-- ================= TERMS AND CONDITIONS POP-UP ================= -->
+  <div class="modal" id="termsModal" hidden role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+    <div class="modal-card">
+      <h2 class="gh" id="termsTitle" data-i18n="termsTitle"></h2>
+      <p class="note" id="termsVer"></p>
+      <p class="note" id="termsIntro"></p>
+      <div class="terms-body" id="termsBody" tabindex="0">
+<!--TERMS-->
+      </div>
+      <p class="note" id="termsHint" data-i18n="termsScroll"></p>
+      <div class="row">
+        <button class="primary" id="termsAccept" type="button" disabled data-i18n="termsAccept"></button>
+        <button class="ghost" id="termsDecline" type="button" data-i18n="termsDecline"></button>
+        <button class="ghost" id="termsClose" type="button" data-i18n="termsClose"></button>
+      </div>
+    </div>
+  </div>
+
 </div>
 <div class="confetti" id="confetti" aria-hidden="true"></div>

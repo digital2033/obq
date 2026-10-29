@@ -191,3 +191,39 @@ Object.assign(QUIZ_I18N.en, {
   pfTitle: "Complete your profile", pfIntro: "You are signed in. Tell us a little about you to finish creating your Quiz Master account.", pfSave: "Continue",
   forgotHint: "Type your email address in the box above, then press Forgot password."
 });
+
+/* better read aloud for every language */
+Object.assign(QUIZ_I18N.en, {
+  voiceL: "Read aloud voice", voiceAuto: "Automatic (best voice found)", voiceOthers: "Other voices on this device", voiceTest: "Test voice",
+  voiceFound: "{n} voice(s) for {lang} found on this device.",
+  voiceNone: "No voice for {lang} is installed on this device. Install one (see Instructions, Read aloud) or choose another voice from the list.",
+  voiceFallback: "No voice of its own was found, so a {from} voice is used instead.",
+  noVoice: "No voice for {lang} was found on this device, so OBQ will not read this aloud (a wrong voice would be unintelligible). Install a voice for {lang} in the device's text-to-speech settings, or choose another voice on the setup page. See Instructions, Read aloud."
+});
+Object.assign(QUIZ_I18N.en, { voiceChosen: "Using the voice you chose." });
+
+/* Terms and Conditions, Settings */
+Object.assign(QUIZ_I18N.en, {
+  termsAgree: "I have read and accept the Terms and Conditions, including the analytics notice.", termsRead: "Read the Terms and Conditions",
+  termsTitle: "Terms and Conditions", termsVer: "Version {v}", termsReqIntro: "Please read and accept the Terms and Conditions to continue.",
+  termsScroll: "Scroll to the end of the terms to enable the Accept button.", termsAccept: "I accept", termsDecline: "Decline and sign out", termsClose: "Close",
+  termsOperatorDefault: "the operator of this app", termsContactDefault: "please use the contact details given on the website where you found this app.",
+  errTerms: "Please read and accept the Terms and Conditions to create your account.",
+  settingsBtn: "Settings", setTitle: "Settings", hSettings: "Settings", hSettingsD: "Theme, font, text size, sound, read-aloud speed and analytics.",
+  setAppearance: "Appearance", setTheme: "Colour theme", themeDark: "Dark", themeLight: "Light", themeSystem: "Match my device",
+  setFont: "Font", fontDefault: "Default (best for the language)", fontSystem: "System font", fontSerif: "Serif",
+  setSize: "Text size", sizeS: "Small", sizeM: "Medium", sizeL: "Large", sizeXL: "Extra large",
+  setQuiz: "Quiz and sound", setSoundL: "Play sounds (timer and answers)", setSpeedL: "Read-aloud speed", speedSlow: "Slow", speedNormal: "Normal", speedFast: "Fast",
+  setWakeL: "Keep the screen awake during a quiz",
+  setPrivacy: "Privacy", setAnalyticsL: "Share anonymous usage analytics to help improve OBQ",
+  setAnalyticsNote: "This is the analytics notice in the Terms and Conditions. Turning it off does not remove your account details or the quiz set-up counts needed to run the service.",
+  setAnalyticsLocal: "Analytics only runs when the app is connected to its online project. Your choice is saved with your account.",
+  setAnalyticsOn: "Analytics is on.", setAnalyticsOff: "Analytics is off.", setTermsInfo: "You accepted the Terms and Conditions, version {v}.",
+  setReset: "Reset settings to defaults", setResetDone: "Settings were reset."
+});
+
+Object.assign(QUIZ_I18N.en, {
+  setProfile: "Your profile", setProfileSave: "Update profile", setProfileOk: "Your profile was updated.",
+  setProfileErr: "Could not update your profile. Check your internet connection and try again.",
+  setEmailNote: "Your email address is your sign-in and cannot be changed here. To change it, contact the administrators."
+});

@@ -338,7 +338,7 @@
     if (withOther) { var oo = el("option", null, T("langOther")); oo.value = "other"; if (current === "other") oo.selected = true; selectEl.appendChild(oo); }
   }
   function paintSelects() {
-    langOptions($("authLang"), ui); langOptions($("fUiLang"), ui); langOptions($("fQuizLang"), quizLangPick, true);
+    langOptions($("authLang"), ui); langOptions($("fUiLang"), ui); langOptions($("tbLang"), ui); langOptions($("fQuizLang"), quizLangPick, true);
     var kv = $("fKbLang").value || "en"; langOptions($("fKbLang"), kv, true);
     $("otherWrap").hidden = $("fQuizLang").value !== "other"; $("kbOtherWrap").hidden = $("fKbLang").value !== "other";
     var u = $("upUsage"), uv = u.value; clear(u);
@@ -490,7 +490,7 @@
     if (!$("fQM").value && user) $("fQM").value = user.name || "";
     if (!$("fDate").value) $("fDate").value = todayISO();
     $("srcBWrap").hidden = !S.builtInBank; if (!S.builtInBank) $("srcU").checked = true;
-    $("trySample").hidden = !S.sampleQuizButton; $("readWrap").hidden = !speechOK;
+    $("trySample").hidden = !S.sampleQuizButton; $("readWrap").hidden = !speechOK; refreshVoicePickers();
     $("saveResWrap").hidden = !(user && ownConnected());              // only when the Quiz Master has connected their own Firebase
     paintSelects(); paintBankInfo(); renderSaved(); show("setup"); refreshAvail();
   }
@@ -498,10 +498,14 @@
     buildBooks();
     $("fScope").addEventListener("change", onScopeChange);
     $("fUiLang").addEventListener("change", function () { setUi($("fUiLang").value); });
+    $("tbLang").addEventListener("change", function () { setUi($("tbLang").value); });
     $("fQuizLang").addEventListener("change", function () { quizLangPick = $("fQuizLang").value; $("otherWrap").hidden = quizLangPick !== "other"; refreshAvail(); });
     $("fOtherLang").addEventListener("input", function () { markBad("fOtherLang", false); refreshAvail(); });
     $("srcB").addEventListener("change", refreshAvail); $("srcU").addEventListener("change", refreshAvail); $("srcK").addEventListener("change", refreshAvail);
     wireKb(); wireSaved(); wireOwn(); wireHome();
+    wireVoicePicker({ wrap: "voiceWrap", sel: "fVoice", test: "fVoiceTest", note: "fVoiceNote", tick: "fRead", getLang: function () { return pickLang("fQuizLang", "fOtherLang").val; } });
+    wireVoicePicker({ wrap: "lVoiceWrap", sel: "lVoice", test: "lVoiceTest", note: "lVoiceNote", tick: "lRead", getLang: function () { return pickLang("lLang", "lOther").val; } });
+    ["fQuizLang", "lLang"].forEach(function (id) { $(id).addEventListener("change", refreshVoicePickers); }); ["fOtherLang", "lOther"].forEach(function (id) { $(id).addEventListener("input", refreshVoicePickers); });
     ["fQM", "fEvent", "fParts"].forEach(function (id) { $(id).addEventListener("input", function () { markBad(id, false); $("setupErr").textContent = ""; }); });
     Array.prototype.forEach.call(document.querySelectorAll(".mode[data-mode]"), function (b) {
       b.addEventListener("click", function () { sel.mode = b.getAttribute("data-mode"); paintSelects(); });

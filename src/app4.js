@@ -195,10 +195,10 @@
       .then(function (txt) { JSON.parse(txt).forEach(function (r) { STARTER_BANK.push(r); }); STARTER = null; });
   }
   function boot() {
-    applyColors(); paintBrand();
+    paintBrand(); applySettings();
     var saved = lsGet("qms.ui", S.defaultUiLang);
     quizLangPick = S.defaultQuizLang; quizLang = quizLangPick; sel.numQ = S.questionCounts[0];
-    wireAuth(); wireSetup(); wireGame();
+    wireAuth(); wireSetup(); wireGame(); wireSettings();
     window.addEventListener("resize", function () { var a = document.activeElement; if (a && a.tagName === "INPUT") return; fitSoon(); });
     window.addEventListener("orientationchange", function () { setTimeout(fitSoon, 250); });
     document.addEventListener("fullscreenchange", function () { paintFs(); setTimeout(fitSoon, 150); });

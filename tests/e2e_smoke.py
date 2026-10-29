@@ -15,7 +15,9 @@ try:
         f = pg.frame_locator("#f"); screen = lambda: pg.frames[1].evaluate("document.body.dataset.screen")
         assert screen() == "auth"
         f.locator("#tabUp").click(); f.locator("#upName").fill("Ann"); f.locator("#upEmail").fill("ann@e.org"); f.locator("#upOrg").fill("X")
-        f.locator("#upCountry").fill("IN"); f.locator("#upUsage").select_option("school"); f.locator("#upPass").fill("abcdef"); f.locator("#btnUp").click(); pg.wait_for_timeout(600)
+        f.locator("#upCountry").fill("IN"); f.locator("#upUsage").select_option("school"); f.locator("#upPass").fill("abcdef")
+        f.locator("#upTermsLink").click(); pg.frames[1].evaluate("document.getElementById('termsBody').scrollTop=99999"); pg.wait_for_timeout(200); f.locator("#termsAccept").click()
+        f.locator("#btnUp").click(); pg.wait_for_timeout(600)
         assert screen() == "home", "sign-up button did not work (expected the Home page)"
         f.locator("[data-card=demo]").click(); pg.wait_for_timeout(400)
         assert screen() == "game"
