@@ -21,7 +21,8 @@ jobs:
         env: { FB: "${{ secrets.FIREBASE_CONFIG_JSON }}" }
         run: |
           if [ -n "$FB" ]; then mkdir -p private && printf '%s' "$FB" > private/firebase.config.json; echo "Firebase config applied"; else echo "No Firebase secret: local mode"; fi
-      - name: Site details for the Terms (optional secret SITE_CONFIG_JSON, e.g. {"operatorName": "...", "contactEmail": "..."})
+  # Optional secret SITE_CONFIG_JSON holds the operator name and contact email shown in the Terms, as JSON with the keys operatorName and contactEmail
+      - name: Site details for the Terms (optional)
         env: { SITE: "${{ secrets.SITE_CONFIG_JSON }}" }
         run: |
           if [ -n "$SITE" ]; then mkdir -p private && printf '%s' "$SITE" > private/site.config.json; fi
